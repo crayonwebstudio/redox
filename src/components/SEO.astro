@@ -1,0 +1,100 @@
+---
+import { SITE } from '../data/site';
+
+interface FaqItem { q: string; a: string; }
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  ogImage?: string;
+  noindex?: boolean;
+  breadcrumbLabel?: string;
+  faq?: FaqItem[];
+}
+const { title, description, path, ogImage, noindex, breadcrumbLabel, faq } = Astro.props;
+const canonical = `${SITE.url}${path}`;
+const og = ogImage ? `${SITE.url}${ogImage}` : `${SITE.url}/assets/imgs/logo/logo.png`;
+const gsc = import.meta.env.PUBLIC_GSC_VERIFICATION;
+const ga = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+
+const org = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${SITE.url}/#organization`,
+  name: SITE.name,
+  url: SITE.url,
+  email: SITE.email,
+  telephone: SITE.phoneTel,
+  description: SITE.description,
+};
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${SITE.url}/#website`,
+  url: SITE.url,
+  name: SITE.name,
+  publisher: { '@id': `${SITE.url}/#organization` },
+};
+const webpage = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${canonical}#webpage`,
+  url: canonical,
+  name: title,
+  description,
+  isPartOf: { '@id': `${SITE.url}/#website` },
+  about: { '@id': `${SITE.url}/#organization` },
+};
+const breadcrumb = breadcrumbLabel
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE.url}/` },
+        { '@type': 'ListItem', position: 2, name: breadcrumbLabel, item: canonical },
+      ],
+    }
+  : undefined;
+const faqSchema = faq?.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    }
+  : undefined;
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={og} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={og} />
+{gsc && <meta name="google-site-verification" content={gsc} />}
+{ga && (
+  <>
+    <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga}`}></script>
+    <script define:vars={{ ga }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', ga);
+    </script>
+  </>
+)}
+<script type="application/ld+json" set:html={JSON.stringify(org)} />
+<script type="application/ld+json" set:html={JSON.stringify(website)} />
+<script type="application/ld+json" set:html={JSON.stringify(webpage)} />
+{breadcrumb && <script type="application/ld+json" set:html={JSON.stringify(breadcrumb)} />}
+{faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}

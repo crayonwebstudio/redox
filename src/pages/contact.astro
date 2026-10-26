@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const props = {
+  title: "Contact Woodwolf Digital",
+  description: "Contact Woodwolf Digital by email at info@woodwolfdigital.com or by phone on +91 9375767751, or send a message through the contact form.",
+  path: "/contact/",
+  bodyClass: "body-wrapper body-page-inner font-heading-sequelsans-romanbody",
+  ogImage: "/assets/imgs/logo/logo.png",
+  breadcrumbLabel: 'Contact',
+  variant: 'inner',
+};
+---
+<BaseLayout {...props}>
+<!-- side toggle end -->
+
+  <!-- Header area start -->
+  
+  <!-- Header area end -->
+
+  
+  
+    
+
+      
+
+        <!-- page title area start  -->
+        <section class="page-title-area">
+          <div class="container large">
+            <div class="page-title-area-inner section-spacing-top">
+              <div class="page-title-wrapper">
+                <h1 class="page-title fade-anim">Contact</h1>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- page title area end  -->
+
+        <!-- contact area start  -->
+        <section class="contact-area-contact-page">
+          <div class="container large">
+            <div class="contact-area-contact-page-inner section-spacing-top">
+              <div class="section-header fade-anim">
+                <div class="section-title-wrapper">
+                  <div class="subtitle-wrapper">
+                    <span class="section-subtitle">Contact</span>
+                  </div>
+                  <div class="title-wrapper">
+                    <h2 class="section-title font-sequelsans-romanbody">Let’s drop us a line
+                      and get the project
+                      started.</h2>
+                  </div>
+                </div>
+              </div>
+              <div class="section-content-wrapper fade-anim">
+                <div class="section-content">
+                  <div class="contact-mail">
+                    <p class="title">Get in touch</p>
+                    <p class="text">We’re excited to hear from you
+                      and let’s start something special
+                      together <br>
+                      <a href="mailto:info@woodwolfdigital.com">info@woodwolfdigital.com</a>
+                    </p>
+                  </div>
+                  <div class="contact-social">
+                    <p class="title">Follow</p>
+                    <div class="social-links">
+                      <a href="#">Facebook</a>
+                      <a href="#">Twitter</a>
+                      <a href="#">LinkedIn</a>
+                      <a href="#">Instagram</a>
+                      <a href="#">Dribbble</a>
+                      <a href="#">Behance</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="contact-wrap">
+                  <form id="contact__form">
+                    <div class="contact-formwrap">
+                      <div class="contact-formfield">
+                        <input type="text" name="name" id="name" placeholder="Name*" aria-label="Name">
+                      </div>
+                      <div class="contact-formfield">
+                        <input type="text" name="email" id="email" placeholder="Email*" aria-label="Email">
+                      </div>
+                      <div class="contact-formfield">
+                        <input type="text" name="phone" id="phone" placeholder="Phone*" aria-label="Phone">
+                      </div>
+                      <div class="contact-formfield">
+                        <input type="text" name="company" id="company" placeholder="Company" aria-label="Company">
+                      </div>
+                      <div class="contact-formfield">
+                        <select name="Budget" id="Budget">
+                          <option value="0" disabled selected>Budget*</option>
+                          <option value="1">5,000 - 10,000</option>
+                          <option value="2">10,000 - 15,000</option>
+                          <option value="3">15,000 - 20,000</option>
+                          <option value="4">20,000 - 25,000</option>
+                          <option value="5">25,000 - Above</option>
+                        </select>
+                      </div>
+                      <div class="contact-formfield">
+                        <input type="text" name="solution" id="solution" placeholder="Solution*" aria-label="Solution">
+                      </div>
+                      <div class="contact-formfield message">
+                        <input type="text" name="message" id="message" placeholder="Message*" aria-label="Message">
+                      </div>
+                    </div>
+                    <div class="submit-btn">
+                      <button type="submit" class="rr-btn">
+                        <span class="btn-wrap">
+                          <span class="text-one">Send Message</span>
+                          <span class="text-two">Send Message</span>
+                        </span>
+                      </button>
+                    </div>
+                    <div id="response-message"></div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- contact area end  -->
+
+      
+
+      <!-- footer area start  -->
+      
+      <!-- footer area end  -->
+
+    </div>
+  </div>
+</BaseLayout>

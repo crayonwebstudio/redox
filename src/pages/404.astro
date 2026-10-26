@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const props = {
+  title: "Page Not Found | Woodwolf Digital",
+  description: "The page you are looking for could not be found on the Woodwolf Digital website.",
+  path: "/404/",
+  bodyClass: "body-wrapper body-page-inner font-heading-sequelsans-romanbody",
+  ogImage: "/assets/imgs/logo/logo.png",
+  noindex: true,
+  breadcrumbLabel: 'Page Not Found',
+  variant: 'inner',
+};
+---
+<BaseLayout {...props}>
+<!-- side toggle end -->
+
+  <!-- Header area start -->
+  
+  <!-- Header area end -->
+
+  
+  
+    
+
+      
+
+        <!-- error area start  -->
+        <section class="error-area">
+          <div class="container large">
+            <div class="error-area-inner section-spacing">
+              <div class="section-content">
+                <div class="section-title-wrapper">
+                  <div class="subtitle-wrapper">
+                    <span class="section-subtitle">404</span>
+                  </div>
+                  <div class="title-wrapper">
+                    <h1 class="section-title font-sequelsans-romanbody">Oops sorry! page
+                      didn't found</h1>
+                  </div>
+                </div>
+                <div class="btn-wrapper">
+                  <a href="/" class="rr-btn">
+                    <span class="btn-wrap">
+                      <span class="text-one">Back - To - Home</span>
+                      <span class="text-two">Back - To - Home</span>
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- error area end  -->
+
+      
+
+      <!-- footer area start  -->
+      
+      <!-- footer area end  -->
+
+    </div>
+  </div>
+</BaseLayout>

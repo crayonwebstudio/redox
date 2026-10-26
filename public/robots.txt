@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://redox.woodwolfdigital.com/sitemap-index.xml
