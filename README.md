@@ -112,3 +112,25 @@ serves the custom 404 page.
   before presenting the site as a portfolio of completed work.
 - No real privacy policy page exists in the supplied files, so the footer
   shows "Privacy Policy" as text, not a link to a page that does not exist.
+
+## Homepage variants (added 2026-10-26)
+
+The template shipped 17 homepage variants. The main homepage stays at `/`.
+The other 16 live as separate pages, each keeping its own template header,
+footer, side-info, stylesheet (style.css or ad-style.css) and vendor scripts:
+
+- /digital-agency/, /creative-agency/, /marketing-agency/, /digital-web-agency/
+- /design-agency/, /branding-agency/, /startup-agency/, /web-design/
+- /web-development/, /modern-agency/, /modern-agency-2/, /modern-agency-3/
+- /agency-portfolio/, /agency-portfolio-2/, /agency-portfolio-3/, /it-solution/
+
+Variant pages use `src/layouts/VariantLayout.astro` with per-variant header,
+footer and side-info fragments in `src/data/variants/`. They carry the same
+Woodwolf Digital branding and link retargeting as the canonical pages, but
+they are `noindex, nofollow` and excluded from the sitemap in
+`astro.config.mjs`, so they are viewable without creating duplicate-content
+competition for the main homepage. They are not in the main navigation;
+the template's own Home dropdown inside variant headers links between them.
+Placeholder links inside variants (404 demo page, Privacy Policy, social
+names) are plain text spans, not invented pages or profiles, and demo
+addresses were removed outright, matching the canonical pages.

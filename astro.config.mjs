@@ -8,7 +8,16 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [
     sitemap({
-      filter: (page) => !page.endsWith('/404/') && !page.endsWith('/404.html'),
+      // Variant homepages are viewable but noindex, so they stay out of the sitemap.
+      filter: (page) =>
+        !page.endsWith('/404/') &&
+        !page.endsWith('/404.html') &&
+        ![
+          'digital-agency', 'creative-agency', 'marketing-agency', 'digital-web-agency',
+          'design-agency', 'branding-agency', 'startup-agency', 'web-design',
+          'web-development', 'modern-agency', 'modern-agency-2', 'modern-agency-3',
+          'agency-portfolio', 'agency-portfolio-2', 'agency-portfolio-3', 'it-solution',
+        ].some((slug) => page.endsWith(`/${slug}/`)),
     }),
   ],
 });
