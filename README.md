@@ -67,7 +67,10 @@ carried over (it also posted to the template author's address).
 - Unique title and description per page, canonical URLs on the production
   domain, one H1 per page, Open Graph and Twitter cards, JSON-LD as above.
 - Clean lowercase URLs; old `.html` URLs redirect to the clean URL in
-  `nginx.conf` (permanent redirect, not to the homepage).
+  `nginx.conf` (permanent redirect, not to the homepage). Nginx uses
+  `try_files $uri $uri/` plus the index directive; adding `$uri/index.html`
+  as a try_files term was tried first and broke every page by redirecting
+  `/about/` to `/about/index/`, so it must not be reintroduced.
 - `robots.txt` allows public content and points at `sitemap-index.xml`.
 - Images below the fold use `loading="lazy"`; the first image is not lazy.
 - Forms have labels (aria-labels where the template used placeholders only),
