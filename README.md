@@ -119,10 +119,14 @@ The template shipped 17 homepage variants. The main homepage stays at `/`.
 The other 16 live as separate pages, each keeping its own template header,
 footer, side-info, stylesheet (style.css or ad-style.css) and vendor scripts:
 
-- /digital-agency/, /creative-agency/, /marketing-agency/, /digital-web-agency/
-- /design-agency/, /branding-agency/, /startup-agency/, /web-design/
-- /web-development/, /modern-agency/, /modern-agency-2/, /modern-agency-3/
-- /agency-portfolio/, /agency-portfolio-2/, /agency-portfolio-3/, /it-solution/
+- /digital-agency/, /marketing-agency/, /digital-web-agency/
+
+The other 13 template homepages (creative-agency, design-agency, startup-agency,
+modern-agency, agency-portfolio, branding-agency, modern-agency-2,
+agency-portfolio-2, agency-portfolio-3, web-design, web-development,
+it-solution, modern-agency-3) were removed 2026-10-26 at milan's request and
+now return the custom 404 page. Links to them from the remaining variants
+point to the main homepage.
 
 Variant pages use `src/layouts/VariantLayout.astro` with per-variant header,
 footer and side-info fragments in `src/data/variants/`. They carry the same
