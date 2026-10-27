@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-the-role-of-a-marketing-agency-in-scaling-your-startup.html?raw';
+---
+<BaseLayout title="The Role of a Marketing Agency in Scaling Your Startup | Woodwolf Digital" description="The Role of a Marketing Agency in Scaling Your Startup 2025-05-18 | Marketing Agency Myriam was first trained as a sculptor in Montreal and then in" path="/the-role-of-a-marketing-agency-in-scaling-your-startup/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="The Role of a Marketing Agency in Scaling Your Startup">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

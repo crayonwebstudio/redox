@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-beyond-the-basics-how-to-take-marketing-to-the-next-level.html?raw';
+---
+<BaseLayout title="The Ultimate Guide to Digital Agency Services That Drive Business Growth | Woodwolf Digital" description="The Ultimate Guide to Digital Agency Services That Drive Business Growth 2025-05-18 | Digital Agency Myriam was first trained as a sculptor in Montreal and" path="/beyond-the-basics-how-to-take-marketing-to-the-next-level/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="The Ultimate Guide to Digital Agency Services That Drive Business Growth">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

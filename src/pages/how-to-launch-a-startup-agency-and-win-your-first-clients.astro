@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-how-to-launch-a-startup-agency-and-win-your-first-clients.html?raw';
+---
+<BaseLayout title="What Startups Can Learn from the Most Successful Agency of the Decade | Woodwolf Digital" description="What Startups Can Learn from the Most Successful Agency of the Decade 2025-05-18 | Startup Agency Myriam was first trained as a sculptor in Montreal and" path="/how-to-launch-a-startup-agency-and-win-your-first-clients/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="What Startups Can Learn from the Most Successful Agency of the Decade">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-allow-us-to-be-the-cool-part-of-your-days-are-open-for-now.html?raw';
+---
+<BaseLayout title="Understanding the Full Spectrum of Services Provided by Digital Agencies | Woodwolf Digital" description="Understanding the Full Spectrum of Services Provided by Digital Agencies 2025-05-18 | Digital Agency Myriam was first trained as a sculptor in Montreal and" path="/allow-us-to-be-the-cool-part-of-your-days-are-open-for-now/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Understanding the Full Spectrum of Services Provided by Digital Agencies">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

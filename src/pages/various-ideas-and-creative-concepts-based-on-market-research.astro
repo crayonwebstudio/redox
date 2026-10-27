@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-various-ideas-and-creative-concepts-based-on-market-research.html?raw';
+---
+<BaseLayout title="Various ideas and creative concepts based on market research | Woodwolf Digital" description="Various ideas and creative concepts based on market research 2025-05-18 | Digital Agency Myriam was first trained as a sculptor in Montreal and then in" path="/various-ideas-and-creative-concepts-based-on-market-research/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Various ideas and creative concepts based on market research">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-services-st-3.html?raw';
+---
+<BaseLayout title="Services ST.3 | Woodwolf Digital" description="Expertise Capabilities We think out of the box when it comes to creative Search Engine Optimization We are internal team of creative project managers search" path="/services-st-3/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Services ST.3">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

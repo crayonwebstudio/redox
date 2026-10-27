@@ -1,7 +1,0 @@
----
-interface Props { variant?: 'home' | 'inner'; }
-const { variant = 'inner' } = Astro.props;
-import homeHtml from '../data/footer-home.html?raw';
-import innerHtml from '../data/footer-inner.html?raw';
----
-<Fragment set:html={variant === 'home' ? homeHtml : innerHtml} />

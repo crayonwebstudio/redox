@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-services-details.html?raw';
+---
+<BaseLayout title="Services Details | Woodwolf Digital" description="[SL: 005] [Brand Guideline] [Next] Brand Guideline You'll need to provide your brand information, and starting history to visualize identity. We speak" path="/services-details/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Services Details">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

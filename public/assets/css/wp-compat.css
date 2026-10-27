@@ -1,0 +1,102 @@
+/* Compatibility styles for the converted theme pages.
+   Written for this build only. Lays out the container system used by the
+   page markup (boxed, full-width and inner containers), widget grids,
+   sliders, headers, footers, forms and the off-canvas panel. */
+
+.e-con { position: relative; width: 100%; }
+.e-con-boxed .e-con-inner { max-width: 1320px; margin-left: auto; margin-right: auto; padding-left: 15px; padding-right: 15px; }
+.e-con-full .e-con-inner { width: 100%; padding-left: 15px; padding-right: 15px; }
+.e-flex { display: flex; }
+.e-con-inner { display: flex; flex-wrap: wrap; gap: 24px; }
+.e-con-inner > .e-con { flex: 1 1 280px; min-width: 0; }
+.e-con-inner > .elementor-widget { flex: 1 1 280px; min-width: 0; }
+.elementor-widget { min-width: 0; }
+
+.skip-link { position: absolute; left: -9999px; top: 0; background: #111; color: #fff; padding: 8px 14px; z-index: 9999; }
+.skip-link:focus { left: 0; }
+
+#preloader { position: fixed; inset: 0; background: #fff; z-index: 99999; display: flex; align-items: center; justify-content: center; }
+#preloader .spinner { width: 48px; height: 48px; border: 4px solid #ddd; border-top-color: #111; border-radius: 50%; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-section { display: none; }
+
+/* Header */
+.header-area, .header-area-2, .header-area-3, .header-area-8 { background: #fff; border-bottom: 1px solid #eee; position: relative; z-index: 100; }
+.header-area__inner, .header-area-2__inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1320px; margin: 0 auto; padding: 18px 15px; }
+.header__logo img { max-height: 48px; width: auto; }
+.arrox-nav-menu { display: flex; flex-wrap: wrap; gap: 8px 28px; list-style: none; margin: 0; padding: 0; }
+.arrox-nav-menu li { position: relative; list-style: none; }
+.arrox-nav-menu a { color: #111; text-decoration: none; font-weight: 500; }
+.arrox-nav-menu ul { display: none; position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #eee; list-style: none; margin: 0; padding: 10px 0; min-width: 220px; z-index: 200; }
+.arrox-nav-menu li:hover > ul, .arrox-nav-menu li:focus-within > ul { display: block; }
+.arrox-nav-menu ul li { padding: 6px 18px; }
+.header__button .rr-btn, .header__button a { display: inline-block; background: #111; color: #fff; padding: 12px 24px; border-radius: 999px; text-decoration: none; }
+.side-toggle { background: #f3f3f3; border: 0; padding: 10px 14px; cursor: pointer; border-radius: 8px; }
+.side-toggle img { max-height: 22px; }
+
+/* Off-canvas panel */
+.offcanvas-area { position: fixed; top: 0; right: 0; width: min(420px, 92vw); height: 100%; background: #fff; z-index: 500; transform: translateX(105%); transition: transform 0.3s ease; overflow-y: auto; padding: 24px; box-shadow: -8px 0 30px rgba(0,0,0,0.12); }
+.offcanvas-area.open { transform: translateX(0); }
+.offcanvas-close, .side-info-close { background: #111; color: #fff; border: 0; padding: 8px 14px; cursor: pointer; border-radius: 6px; }
+.offcanvas-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 400; display: none; }
+.offcanvas-overlay.open { display: block; }
+
+/* Page sections */
+main { overflow-x: clip; }
+.elementor-element img { max-width: 100%; height: auto; }
+.arrox-el-section { padding-top: 40px; padding-bottom: 40px; }
+.section-title { line-height: 1.05; }
+.text-invert { max-width: 900px; }
+
+/* Widget grids: portfolio, services, team, brands, testimonials */
+.works-wrapper-box, .featured-work-wrapper-box { flex: 1 1 300px; min-width: 0; }
+.service-box, .team-box, .feature-box, .project-item, .service-row { margin-bottom: 24px; }
+.clients-wrapper, .ab-brand-slide-wrap { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+.client-box img, .ab-brand-item img { max-width: 170px; height: auto; }
+.swiper { overflow: hidden; }
+.swiper-wrapper { display: flex; }
+.swiper-slide { flex: 0 0 auto; width: 300px; max-width: 88vw; margin-right: 20px; }
+.swiper-slide img { width: 100%; height: auto; display: block; }
+.post-cards { display: flex; flex-wrap: wrap; gap: 24px; }
+.post-card { flex: 1 1 300px; border: 1px solid #eee; border-radius: 12px; overflow: hidden; }
+.post-card img { width: 100%; height: auto; display: block; }
+.post-card-body { padding: 18px; }
+.post-card-body h3 { margin: 0 0 8px; }
+.post-card-body h3 a { color: #111; text-decoration: none; }
+.post-meta { color: #666; font-size: 14px; margin-bottom: 8px; }
+
+/* Footer */
+footer { background: #111; color: #ddd; }
+footer a { color: #ddd; }
+footer ul { list-style: none; padding: 0; }
+.footer-links li { margin-bottom: 8px; }
+.footer-bottom { border-top: 1px solid #333; padding: 18px 0; }
+
+/* Forms */
+.contact-formfield, .form-field { margin-bottom: 14px; }
+.contact-formfield input, .contact-formfield textarea, .contact-formfield select,
+.form-field input, .form-field textarea, .form-field select,
+.subscribe-form input[type="email"] { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px; font: inherit; }
+.contact-formfield textarea, .form-field textarea { min-height: 140px; }
+button[type="submit"], input[type="submit"], .submit-btn { background: #111; color: #fff; border: 0; padding: 13px 26px; border-radius: 999px; cursor: pointer; }
+.form-status { margin-top: 12px; }
+.form-status[data-state="error"] { color: #b00020; }
+.subscribe-form { display: flex; gap: 10px; flex-wrap: wrap; }
+.subscribe-form input[type="email"] { flex: 1 1 220px; }
+
+/* Back to top */
+.back-to-top-wrapper { position: fixed; right: 20px; bottom: 20px; z-index: 300; }
+.back-to-top-btn { display: none; background: #111; color: #fff; border: 0; padding: 11px 16px; border-radius: 999px; cursor: pointer; }
+.back-to-top-btn.visible { display: block; }
+
+/* Single post */
+.post-single { max-width: 900px; margin: 0 auto; padding: 40px 15px 80px; }
+.post-single img { max-width: 100%; height: auto; }
+.post-single .post-meta { margin-bottom: 20px; }
+
+@media (max-width: 900px) {
+  .arrox-nav-menu { display: none; }
+  .header__nav { display: none; }
+  .e-con-inner { flex-direction: column; }
+  .swiper-slide { width: 260px; }
+}

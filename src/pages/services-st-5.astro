@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-services-st-5.html?raw';
+---
+<BaseLayout title="Services ST.5 | Woodwolf Digital" description="Expertise Services Services we provide We are here to build solid and courageous brands that can leave a strong mark on the world. (001) UI/UX Design We" path="/services-st-5/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Services ST.5">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

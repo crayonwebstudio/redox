@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-top-crypto-thought-leaders-inhong-kong.html?raw';
+---
+<BaseLayout title="Top Crypto Thought Leaders inHong Kong. | Woodwolf Digital" description="Top Crypto Thought Leaders inHong Kong. 2025-03-05 | Digital Agency Modern Myriam was first trained as a sculptor in Montreal and then in Helsinki, Finland." path="/top-crypto-thought-leaders-inhong-kong/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Top Crypto Thought Leaders inHong Kong.">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

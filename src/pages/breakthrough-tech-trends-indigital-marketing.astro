@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-breakthrough-tech-trends-indigital-marketing.html?raw';
+---
+<BaseLayout title="Breakthrough Tech Trends inDigital Marketing. | Woodwolf Digital" description="Breakthrough Tech Trends inDigital Marketing. 2025-03-01 | Digital Agency Modern Myriam was first trained as a sculptor in Montreal and then in Helsinki," path="/breakthrough-tech-trends-indigital-marketing/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Breakthrough Tech Trends inDigital Marketing.">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

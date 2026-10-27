@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-about-us.html?raw';
+---
+<BaseLayout title="About Us | Woodwolf Digital" description="Since 2012 About studio Crafting digital products with a unique \u2014 vision of making user experience better. Art Direction Capability Sustainability Woodwolf" path="/about-us/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="About Us">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

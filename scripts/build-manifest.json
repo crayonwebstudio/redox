@@ -1,0 +1,215 @@
+{
+  "pages": {
+    "about-us": {
+      "url": "/about-us/",
+      "title": "About Us"
+    },
+    "contact": {
+      "url": "/contact/",
+      "title": "Contact"
+    },
+    "digital-agency": {
+      "url": "/digital-agency/",
+      "title": "Digital Agency"
+    },
+    "digital-agency-classic": {
+      "url": "/digital-agency-classic/",
+      "title": "Digital Agency Classic"
+    },
+    "digital-agency-modern": {
+      "url": "/digital-agency-modern/",
+      "title": "Digital Agency Modern"
+    },
+    "faq": {
+      "url": "/faq/",
+      "title": "FAQ"
+    },
+    "journals": {
+      "url": "/journals/",
+      "title": "Journals"
+    },
+    "marketing-agency": {
+      "url": "/marketing-agency/",
+      "title": "Marketing Agency"
+    },
+    "portfolio": {
+      "url": "/portfolio/",
+      "title": "Portfolio"
+    },
+    "portfolio-details": {
+      "url": "/portfolio-details/",
+      "title": "Portfolio Details"
+    },
+    "portfolio-st-2": {
+      "url": "/portfolio-st-2/",
+      "title": "Portfolio ST.2"
+    },
+    "portfolio-st-3": {
+      "url": "/portfolio-st-3/",
+      "title": "Portfolio ST.3"
+    },
+    "portfolio-st-4": {
+      "url": "/portfolio-st-4/",
+      "title": "Portfolio ST.4"
+    },
+    "portfolio-st-5": {
+      "url": "/portfolio-st-5/",
+      "title": "Portfolio ST.5"
+    },
+    "portfolio-st-6": {
+      "url": "/portfolio-st-6/",
+      "title": "Portfolio ST.6"
+    },
+    "service": {
+      "url": "/service/",
+      "title": "Service"
+    },
+    "services-details": {
+      "url": "/services-details/",
+      "title": "Services Details"
+    },
+    "services-st-2": {
+      "url": "/services-st-2/",
+      "title": "Services ST.2"
+    },
+    "services-st-3": {
+      "url": "/services-st-3/",
+      "title": "Services ST.3"
+    },
+    "services-st-4": {
+      "url": "/services-st-4/",
+      "title": "Services ST.4"
+    },
+    "services-st-5": {
+      "url": "/services-st-5/",
+      "title": "Services ST.5"
+    },
+    "services-st-6": {
+      "url": "/services-st-6/",
+      "title": "Services ST.6"
+    },
+    "team": {
+      "url": "/team/",
+      "title": "Team"
+    },
+    "team-details": {
+      "url": "/team-details/",
+      "title": "Team Details"
+    }
+  },
+  "homepage": {
+    "url": "/",
+    "content": "digital-agency"
+  },
+  "posts": {
+    "a-full-service-agency-for-ambitious-businesses": {
+      "url": "/a-full-service-agency-for-ambitious-businesses/",
+      "title": "A Full-Service Agency for Ambitious Businesses"
+    },
+    "allow-us-to-be-the-cool-part-of-your-days-are-open-for-now": {
+      "url": "/allow-us-to-be-the-cool-part-of-your-days-are-open-for-now/",
+      "title": "Understanding the Full Spectrum of Services Provided by Digital Agencies"
+    },
+    "beyond-the-basics-how-to-take-marketing-to-the-next-level": {
+      "url": "/beyond-the-basics-how-to-take-marketing-to-the-next-level/",
+      "title": "The Ultimate Guide to Digital Agency Services That Drive Business Growth"
+    },
+    "big-ideas-bold-designs-studio-perspective": {
+      "url": "/big-ideas-bold-designs-studio-perspective/",
+      "title": "Big Ideas, Bold Designs Studio Perspective."
+    },
+    "breakthrough-tech-trends-indigital-marketing": {
+      "url": "/breakthrough-tech-trends-indigital-marketing/",
+      "title": "Breakthrough Tech Trends inDigital Marketing."
+    },
+    "design-dissrupted-bold-ideas-breakthroughs": {
+      "url": "/design-dissrupted-bold-ideas-breakthroughs/",
+      "title": "Design Dissrupted Bold Ideas & Breakthroughs."
+    },
+    "how-to-launch-a-startup-agency-and-win-your-first-clients": {
+      "url": "/how-to-launch-a-startup-agency-and-win-your-first-clients/",
+      "title": "What Startups Can Learn from the Most Successful Agency of the Decade"
+    },
+    "the-creative-path-to-iconic-branding": {
+      "url": "/the-creative-path-to-iconic-branding/",
+      "title": "The Creative Path to Iconic Branding."
+    },
+    "the-role-of-a-marketing-agency-in-scaling-your-startup": {
+      "url": "/the-role-of-a-marketing-agency-in-scaling-your-startup/",
+      "title": "The Role of a Marketing Agency in Scaling Your Startup"
+    },
+    "the-ultimate-guide-to-choosing-the-right-startup-agency-for-your-new-business": {
+      "url": "/the-ultimate-guide-to-choosing-the-right-startup-agency-for-your-new-business/",
+      "title": "The Ultimate Guide to Choosing the Right Startup Agency for Your New Business"
+    },
+    "top-crypto-thought-leaders-inhong-kong": {
+      "url": "/top-crypto-thought-leaders-inhong-kong/",
+      "title": "Top Crypto Thought Leaders inHong Kong."
+    },
+    "various-ideas-and-creative-concepts-based-on-market-research": {
+      "url": "/various-ideas-and-creative-concepts-based-on-market-research/",
+      "title": "Various ideas and creative concepts based on market research"
+    },
+    "what-a-full-service-marketing-agency-can-do-for-your-brand": {
+      "url": "/what-a-full-service-marketing-agency-can-do-for-your-brand/",
+      "title": "What a Full-Service Marketing Agency Can Do for Your Brand"
+    },
+    "what-to-expect-during-the-first-90-days-with-a-startup-agency-partner": {
+      "url": "/what-to-expect-during-the-first-90-days-with-a-startup-agency-partner/",
+      "title": "What to Expect During the First 90 Days with a Startup Agency Partner"
+    }
+  },
+  "image_urls_referenced": 215,
+  "images_failed": [],
+  "unknown_page_links": {},
+  "widget_counts": {
+    "arrox-header-3": 1,
+    "arrox-header": 1,
+    "arrox-header-8": 1,
+    "arrox-header-2": 1,
+    "shortcode": 3,
+    "rt-footer-anchor": 12,
+    "rt-footer-links": 9,
+    "text-editor": 50,
+    "arrox_button_three": 4,
+    "arrox_footer_subscribe_form": 1,
+    "arrox_footer_button": 1,
+    "arrox-theme-button": 9,
+    "arrox-about-vertical-image-slider": 1,
+    "arrox-brand-slider": 2,
+    "arrox-image": 26,
+    "arrox-team-box": 2,
+    "arrox-contact-form": 1,
+    "arrox-image-shape": 1,
+    "arrox-heading": 1,
+    "arrox_news_ticker": 1,
+    "rt-image-portfolio": 76,
+    "rt-brand-bounch": 7,
+    "rt-cta-work": 1,
+    "rt-banner": 1,
+    "arrox_brand_slider_slider": 1,
+    "arrox_career_text_slider": 3,
+    "arrox_award": 3,
+    "arrox_testimonial_slider_two": 2,
+    "arrox_blog_post_list": 2,
+    "arrox_hero_banner": 1,
+    "arrox_portfolio_list": 1,
+    "arrox-blog-post": 4,
+    "arrox-hero-animated-title": 1,
+    "arrox_heading": 7,
+    "arrox_services_list": 3,
+    "arrox_feature_list": 5,
+    "arrox-invert-text": 6,
+    "arrox_services_vertical_slider": 1
+  },
+  "warnings": [],
+  "approximations": [
+    "Theme main.js and the plugin slider script are NOT shipped: both require jQuery and the builder runtime. A small vanilla script (site-wp.js) handles sliders (Swiper), background images, off-canvas, back-to-top and forms instead.",
+    "Slider widgets render as Swiper markup and are initialised generically; per-widget autoplay/speed settings from the demo are not reproduced exactly.",
+    "Demo video URLs (rrdevs.net) were dropped, never hotlinked; video slides render as image slides.",
+    "Font Awesome light/thin icon weights are mapped to solid so icons render without the pro font.",
+    "CSS comments were stripped from copied theme stylesheets.",
+    "The theme ad/ folder is not shipped; no kept page references it.",
+    "Post pages render title, date, categories, featured image and body only; the theme related-posts block is not reproduced."
+  ]
+}

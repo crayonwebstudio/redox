@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-services-st-6.html?raw';
+---
+<BaseLayout title="Services ST.6 | Woodwolf Digital" description="Expertise Our capabilities Art Direction We are internal team of creative project managers search engine optimization. Explore Interaction Design We are" path="/services-st-6/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Services ST.6">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

@@ -8,13 +8,12 @@ export default defineConfig({
   trailingSlash: 'always',
   integrations: [
     sitemap({
-      // Variant homepages are viewable but noindex, so they stay out of the sitemap.
+      // The 404 page is excluded, and /digital-agency/ is excluded because
+      // it duplicates the homepage content (it is noindex, canonical /).
       filter: (page) =>
         !page.endsWith('/404/') &&
         !page.endsWith('/404.html') &&
-        ![
-          'digital-agency', 'marketing-agency', 'digital-web-agency',
-        ].some((slug) => page.endsWith(`/${slug}/`)),
+        !page.endsWith('/digital-agency/'),
     }),
   ],
 });

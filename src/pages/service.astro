@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-service.html?raw';
+---
+<BaseLayout title="Service | Woodwolf Digital" description="Expertise Capabilities We think out of the box when it comes to creative (01) Branding Creative Direction Brand Identity Branding Strategy Graphic Design" path="/service/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Service">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

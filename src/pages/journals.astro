@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-journals.html?raw';
+---
+<BaseLayout title="Journals | Woodwolf Digital" description="Journals Recent blog Learn our recent journal 2025-05-18 | Digital Agency Understanding the Full Spectrum of Services Provided by Digital Agencies Myriam" path="/journals/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Journals">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

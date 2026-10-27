@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-the-ultimate-guide-to-choosing-the-right-startup-agency-for-your-new-business.html?raw';
+---
+<BaseLayout title="The Ultimate Guide to Choosing the Right Startup Agency for Your New Business | Woodwolf Digital" description="The Ultimate Guide to Choosing the Right Startup Agency for Your New Business 2025-05-18 | Startup Agency Myriam was first trained as a sculptor in Montreal" path="/the-ultimate-guide-to-choosing-the-right-startup-agency-for-your-new-business/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="The Ultimate Guide to Choosing the Right Startup Agency for Your New Business">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

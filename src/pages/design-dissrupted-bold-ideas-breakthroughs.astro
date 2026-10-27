@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-design-dissrupted-bold-ideas-breakthroughs.html?raw';
+---
+<BaseLayout title="Design Dissrupted Bold Ideas & Breakthroughs. | Woodwolf Digital" description="Design Dissrupted Bold Ideas & Breakthroughs. 2025-04-01 | Digital Agency Classic Myriam was first trained as a sculptor in Montreal and then in Helsinki," path="/design-dissrupted-bold-ideas-breakthroughs/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Design Dissrupted Bold Ideas & Breakthroughs.">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

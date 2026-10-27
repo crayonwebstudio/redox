@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-portfolio-st-5.html?raw';
+---
+<BaseLayout title="Portfolio ST.5 | Woodwolf Digital" description="Portfolio Woodwolf Digital Digital Agency HTML Template Website, Themeforest (2025) Al Khobar Uptown Visual Identity, Branding (2021) Save Me Saudia" path="/portfolio-st-5/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Portfolio ST.5">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

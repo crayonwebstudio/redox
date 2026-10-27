@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-portfolio-st-2.html?raw';
+---
+<BaseLayout title="Portfolio ST.2 | Woodwolf Digital" description="Portfolio Kashtech Doyel 2025 - Design Saudi Lime Green 2025 - Design Panda Automap 2025 - Design Saudi Venture Capital 2025 - Design Rebrand Lawberry 2025" path="/portfolio-st-2/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Portfolio ST.2">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

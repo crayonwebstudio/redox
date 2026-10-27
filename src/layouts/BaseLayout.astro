@@ -1,23 +1,20 @@
 ---
 import SEO from '../components/SEO.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import SideInfo from '../components/SideInfo.astro';
-import '../styles/global.css';
 
-interface FaqItem { q: string; a: string; }
 interface Props {
   title: string;
   description: string;
   path: string;
-  bodyClass: string;
+  bodyClass?: string;
   ogImage?: string;
   noindex?: boolean;
+  canonicalPath?: string;
   breadcrumbLabel?: string;
-  faq?: FaqItem[];
-  variant?: 'home' | 'inner';
+  headerHtml: string;
+  footerHtml: string;
+  offcanvasHtml?: string;
 }
-const { title, description, path, bodyClass, ogImage, noindex, breadcrumbLabel, faq, variant = 'inner' } = Astro.props;
+const { title, description, path, bodyClass, ogImage, noindex, canonicalPath, breadcrumbLabel, headerHtml, footerHtml, offcanvasHtml } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
@@ -25,22 +22,18 @@ const { title, description, path, bodyClass, ogImage, noindex, breadcrumbLabel, 
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <SEO title={title} description={description} path={path} ogImage={ogImage} noindex={noindex} breadcrumbLabel={breadcrumbLabel} faq={faq} />
+    <SEO title={title} description={description} path={path} ogImage={ogImage} noindex={noindex} canonicalPath={canonicalPath} breadcrumbLabel={breadcrumbLabel} />
     <link rel="icon" type="image/x-icon" href="/assets/imgs/logo/favicon.png" />
-    <link rel="stylesheet" href="/assets/vendor/bootstrap.min.css" />
-    <link rel="stylesheet" href="/assets/vendor/fontawesome.min.css" />
-    <link rel="stylesheet" href="/assets/vendor/swiper-bundle.min.css" />
-    <link rel="stylesheet" href="/assets/vendor/meanmenu.min.css" />
-    <link rel="stylesheet" href="/assets/vendor/magnific-popup.css" />
-    <link rel="stylesheet" href="/assets/vendor/animate.min.css" />
-    <link rel="stylesheet" href="/assets/css/style.css" />
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/assets/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="/assets/css/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="/assets/css/animate.min.css" />
+    <link rel="stylesheet" href="/assets/css/redox-core.css" />
+    <link rel="stylesheet" href="/assets/css/redox-spacing.css" />
+    <link rel="stylesheet" href="/assets/css/redox-unit.css" />
+    <link rel="stylesheet" href="/assets/css/redox-update.css" />
+    <link rel="stylesheet" href="/assets/css/wp-compat.css" />
     <style>
-      /* Preloader safety net: the template hides #preloader from main.js,
-         which depends on jQuery and the vendor bundle. If any of those fail,
-         the spinner would cover the page forever, which is what a real
-         browser check caught. This CSS fallback hides it after 6 seconds
-         even with JavaScript disabled, and the inline script below removes
-         it after 1.5 seconds without depending on any library. */
       @keyframes preloader-hide { to { opacity: 0; visibility: hidden; } }
       #preloader { animation: preloader-hide 0s 6s forwards; }
     </style>
@@ -55,54 +48,21 @@ const { title, description, path, bodyClass, ogImage, noindex, breadcrumbLabel, 
       </div>
     </div>
     <script is:inline>
-      // Independent of jQuery and the vendor bundle: remove the preloader
-      // shortly after parsing, and again as a backup, so a vendor script
-      // failure can never leave the spinner covering the page.
-      (function () {
-        function hide() { var p = document.getElementById('preloader'); if (p) p.remove(); }
-        setTimeout(hide, 1500);
-        setTimeout(hide, 5000);
-      })();
+      setTimeout(function () { var p = document.getElementById('preloader'); if (p) p.remove(); }, 1500);
+      setTimeout(function () { var p = document.getElementById('preloader'); if (p) p.remove(); }, 5000);
     </script>
-    <div class="progress-wrap">
-      <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
-        <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98"></path>
-      </svg>
+    <Fragment set:html={headerHtml} />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Fragment set:html={footerHtml} />
+    {offcanvasHtml && <Fragment set:html={offcanvasHtml} />}
+    <div class="back-to-top-wrapper">
+      <button id="back-to-top" type="button" class="back-to-top-btn" aria-label="Back to top">
+        <span>Top</span>
+      </button>
     </div>
-    <div class="cursor-wrapper relative">
-      <div class="cursor"></div>
-      <div class="cursor-follower"></div>
-    </div>
-    <SideInfo />
-    <div class="offcanvas-overlay"></div>
-    <Header variant={variant} />
-    <div class="has-smooth" id="has_smooth"></div>
-    <div id="smooth-wrapper">
-      <div id="smooth-content">
-        <main id="main-content">
-          <slot />
-        </main>
-        <Footer variant={variant} />
-      </div>
-    </div>
-     <script is:inline src="/assets/vendor/jquery-3.7.1.min.js"></script>
-     <script is:inline src="/assets/vendor/bootstrap.bundle.min.js"></script>
-     <script is:inline src="/assets/vendor/jquery.magnific-popup.min.js"></script>
-     <script is:inline src="/assets/vendor/swiper-bundle.min.js"></script>
-     <script is:inline src="/assets/vendor/gsap.min.js"></script>
-     <script is:inline src="/assets/vendor/ScrollTrigger.min.js"></script>
-     <script is:inline src="/assets/vendor/ScrollSmoother.min.js"></script>
-     <script is:inline src="/assets/vendor/ScrollToPlugin.min.js"></script>
-     <script is:inline src="/assets/vendor/SplitText.min.js"></script>
-     <script is:inline src="/assets/vendor/TextPlugin.js"></script>
-     <script is:inline src="/assets/vendor/customEase.js"></script>
-     <script is:inline src="/assets/vendor/Flip.min.js"></script>
-     <script is:inline src="/assets/vendor/jquery.meanmenu.min.js"></script>
-     <script is:inline src="/assets/vendor/backToTop.js"></script>
-     <script is:inline src="/assets/vendor/matter.js"></script>
-     <script is:inline src="/assets/vendor/throwable.js"></script>
-     <script is:inline src="/assets/js/magiccursor.js"></script>
-     <script is:inline src="/assets/js/main.js"></script>
-    <script is:inline src="/js/site.js"></script>
+    <script src="/assets/js/swiper-bundle.min.js" defer></script>
+    <script src="/assets/js/site-wp.js" defer></script>
   </body>
 </html>

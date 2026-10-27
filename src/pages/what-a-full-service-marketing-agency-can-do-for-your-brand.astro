@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-what-a-full-service-marketing-agency-can-do-for-your-brand.html?raw';
+---
+<BaseLayout title="What a Full-Service Marketing Agency Can Do for Your Brand | Woodwolf Digital" description="What a Full-Service Marketing Agency Can Do for Your Brand 2025-05-18 | Digital Agency, Marketing Agency Myriam was first trained as a sculptor in Montreal" path="/what-a-full-service-marketing-agency-can-do-for-your-brand/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="What a Full-Service Marketing Agency Can Do for Your Brand">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

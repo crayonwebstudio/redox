@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-15849.html?raw';
+import footerHtml from '../data/wp/footer-16296.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-digital-agency-modern.html?raw';
+---
+<BaseLayout title="Digital Agency Modern | Woodwolf Digital" description="Digital Performance Agency WE STARATEGICALL CONNECT BRANDS WITH AUDIENCES WE STARATEGICALL CONNECT BRANDS WITH AUDIENCES Who are we? We narrate the" path="/digital-agency-modern/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Digital Agency Modern">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

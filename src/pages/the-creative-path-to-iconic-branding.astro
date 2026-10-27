@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/post-the-creative-path-to-iconic-branding.html?raw';
+---
+<BaseLayout title="The Creative Path to Iconic Branding. | Woodwolf Digital" description="The Creative Path to Iconic Branding. 2025-03-03 | Digital Agency Modern was first trained as a sculptor in Montreal and then in Helsinki, Finland. She is" path="/the-creative-path-to-iconic-branding/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="The Creative Path to Iconic Branding.">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>

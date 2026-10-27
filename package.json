@@ -1,18 +1,1 @@
-{
-  "name": "redox",
-  "type": "module",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
-  },
-  "dependencies": {
-    "astro": "^5.0.0",
-    "@astrojs/sitemap": "^3.0.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.0.0"
-  }
-}
+{"dependencies":{"@astrojs/sitemap":"^3.0.0","astro":"^5.0.0"},"devDependencies":{"typescript":"^5.0.0"},"name":"redox-wp-astro","private":true,"scripts":{"build":"astro build","dev":"astro dev","preview":"astro preview"},"type":"module","version":"1.0.0"}

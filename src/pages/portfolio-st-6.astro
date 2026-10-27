@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import headerHtml from '../data/wp/header-8350.html?raw';
+import footerHtml from '../data/wp/footer-8336.html?raw';
+import offcanvasHtml from '../data/wp/offcanvas.html?raw';
+import contentHtml from '../data/wp/page-portfolio-st-6.html?raw';
+---
+<BaseLayout title="Portfolio ST.6 | Woodwolf Digital" description="Explore Portfolio ST.6 from Woodwolf Digital, a creative agency for design, development and marketing." path="/portfolio-st-6/" headerHtml={headerHtml} footerHtml={footerHtml} offcanvasHtml={offcanvasHtml} breadcrumbLabel="Portfolio ST.6">
+  <Fragment set:html={contentHtml} />
+</BaseLayout>
