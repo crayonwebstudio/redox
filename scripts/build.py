@@ -1361,8 +1361,20 @@ def local_bg_url(url, failed):
     return url
 
 
-def extract_props(s, eltype, failed, base_settings=None, is_base=False):
-    """One breakpoint's settings -> (self, inner, heading, inner_max) prop dicts."""
+def extract_props(s, eltype, failed, base_settings=None, is_base=False,
+                  parent_dir=None, self_dir=None, self_wrap=None,
+                  parent_inner=False, cancel_base_flex=False):
+    """One breakpoint's settings -> (self, inner, heading, inner_max) prop dicts.
+
+    parent_dir is the parent container's effective flex direction at this
+    breakpoint ("row", "column", "grid", or None when unknown/not a flex
+    container); self_dir/self_wrap are this element's own effective
+    direction/wrap; parent_inner says children sit in a .e-con-inner
+    wrapper; cancel_base_flex says a base flex shorthand must be undone
+    at this breakpoint because the parent turned column. Round 5 uses
+    them for axis-aware width emission, the column-item flex pin, and
+    the column wrap default.
+    """
     self_p, inner_p, head_p = {}, {}, {}
     inner_max = None
     # Width / flex item sizing.
@@ -1378,6 +1390,20 @@ def extract_props(s, eltype, failed, base_settings=None, is_base=False):
             wv = "100%"
         if wv in ("auto", "initial", "inherit", "unset"):
             self_p["width"] = wv
+        elif parent_dir in ("column", "grid"):
+            # Round 5: an Elementor width always means a fraction of the
+            # parent's WIDTH. In a row parent, flex-basis percent equals
+            # width percent, so the old flex shorthand was correct. In a
+            # column parent, flex-basis percent resolves against the
+            # parent's HEIGHT, so `flex: 0 0 100%` made the item as tall
+            # as the container: the classic hero row filled the whole
+            # first column, and with the inherited wrap the grid rows
+            # below it wrapped into a second column off the right edge.
+            # Emit width only; flex defaults (0 1 auto) give content
+            # height and the width fraction across.
+            self_p["max-width"] = wv
+            self_p["width"] = wv
+            self_p["--width"] = wv
         else:
             self_p["flex"] = f"0 0 {wv}"
             self_p["max-width"] = wv
@@ -1392,6 +1418,9 @@ def extract_props(s, eltype, failed, base_settings=None, is_base=False):
     fas = s.get("_flex_align_self")
     if fas:
         self_p["align-self"] = fas
+    # (Round 5 column-item pin lives at the end of this function, once
+    # self_p is complete, so the "rule exists anyway" test sees every
+    # prop this breakpoint emits, not just the width/flex ones above.)
     # Container flex layout. Rendered HTML puts children inside .e-con-inner
     # ONLY for boxed containers; full-width containers hold children directly
     # (verified across all dist pages: every boxed container has an inner
@@ -1435,6 +1464,21 @@ def extract_props(s, eltype, failed, base_settings=None, is_base=False):
         gv = gap_value(s.get("flex_gap") if s.get("flex_gap") is not None else s.get("gap"))
         if gv:
             target["gap"] = gv
+        if not fw and self_dir == "column" and self_wrap is None and target:
+            # Round 5: wp-compat gives every .e-con-inner flex-wrap: wrap.
+            # In a column container that wrap is almost never intended,
+            # and it is what shoved the classic hero's grid rows into a
+            # second column off-screen once the hero row mis-sized to
+            # full height. A column container with no wrap setting at
+            # any breakpoint in its chain gets an explicit nowrap; an
+            # explicit wrap anywhere in the chain is preserved. Row
+            # containers are untouched: they keep the wp-compat wrap
+            # that passing layouts currently rely on. The rule is only
+            # added where this breakpoint already emits container props:
+            # for a property-less breakpoint the inherited wrap is inert
+            # at content-determined heights, and emitting here would add
+            # a rule for every such container at every breakpoint.
+            target["flex-wrap"] = "nowrap"
         # Round 4: grid containers. Previously nothing rendered them as
         # grids at all (no display:grid anywhere), so grid children stacked
         # as full-width blocks; the classic hero's counter row and thumb
@@ -1553,6 +1597,33 @@ def extract_props(s, eltype, failed, base_settings=None, is_base=False):
         inner_max = size_value(cw, "max-width")
         if inner_max:
             self_p["--content-width"] = inner_max
+    # Round 5 column-item pin: an item of a column parent with no flex
+    # shorthand of its own would otherwise inherit wp-compat's generic
+    # inner-child rule (flex: 1 1 280px), which in a column parent means
+    # vertical growth from a 280px-tall basis (this is what the hero
+    # grid rows got). Pin it to content sizing instead, but only where
+    # a rule exists anyway or a base flex shorthand must be cancelled:
+    # emitting a pin for every property-less element at every breakpoint
+    # would bloat the stylesheet with thousands of redundant rules, and
+    # with content-determined container heights the generic grow is
+    # inert for those elements. A numeric _flex_size keeps its grow
+    # factor and only loses the bogus basis; a non-numeric grow value
+    # (the demo emits "none" for some containers, which is not a valid
+    # flex-grow) is treated as no explicit grow, and the pin's shorthand
+    # placed after it wins over it in the same rule.
+    if parent_dir == "column" and "flex" not in self_p:
+        fg = self_p.get("flex-grow")
+        numeric_grow = False
+        if fg is not None:
+            try:
+                float(fg)
+                numeric_grow = True
+            except (TypeError, ValueError):
+                numeric_grow = False
+        if numeric_grow:
+            self_p["flex-basis"] = "auto"
+        elif (parent_inner and self_p) or cancel_base_flex:
+            self_p["flex"] = "0 1 auto"
     return self_p, inner_p, head_p, inner_max
 
 
@@ -1634,11 +1705,13 @@ def element_has_layout(settings):
     return False
 
 
-def walk_elements(nodes, out):
+def walk_elements(nodes, out, parent=None, parent_map=None):
     for n in nodes:
         if isinstance(n, dict):
             out.append(n)
-            walk_elements(n.get("elements") or [], out)
+            if parent_map is not None and id(n) not in parent_map:
+                parent_map[id(n)] = parent
+            walk_elements(n.get("elements") or [], out, n, parent_map)
 
 
 def collect_layout_elements():
@@ -1657,20 +1730,20 @@ def collect_layout_elements():
             recs.append(FOOTERS[fid])
     if DATA["offcanvas"] is not None:
         recs.append(DATA["offcanvas"])
-    seen, els = set(), []
+    seen, els, parent_map = set(), [], {}
     for rec in recs:
         try:
             data = json.loads(rec["meta"].get("_elementor_data", "[]"))
         except Exception:
             continue
         batch = []
-        walk_elements(data, batch)
+        walk_elements(data, batch, None, parent_map)
         for el in batch:
             eid = el.get("id")
             if eid and eid not in seen:
                 seen.add(eid)
                 els.append(el)
-    return els
+    return els, parent_map
 
 
 def _resolve_px(val, fs_px):
@@ -1696,11 +1769,68 @@ def _resolve_px(val, fs_px):
     return None
 
 
-def element_layout_rules(el, failed):
+# Round 5: breakpoint fallback chains, in most-specific-first order. The
+# emitted stylesheet orders blocks base, widescreen, laptop, tablet_extra,
+# tablet, mobile_extra, mobile, so at any viewport the winning value for a
+# property is the one set in the last matching block in that order. A
+# breakpoint that does not set the property inherits from the next larger
+# matching block, falling back to base. These chains reproduce that cascade
+# when resolving a parent's or an element's own effective direction/wrap.
+BP_FALLBACK = {
+    "base": ["base"],
+    "widescreen": ["widescreen", "base"],
+    "laptop": ["laptop", "base"],
+    "tablet_extra": ["tablet_extra", "laptop", "base"],
+    "tablet": ["tablet", "tablet_extra", "laptop", "base"],
+    "mobile_extra": ["mobile_extra", "tablet", "tablet_extra", "laptop", "base"],
+    "mobile": ["mobile", "mobile_extra", "tablet", "tablet_extra", "laptop", "base"],
+}
+
+
+def _chain_get(base, per, bp, key):
+    """First set value for key scanning bp's fallback chain, else None."""
+    for cand in BP_FALLBACK[bp]:
+        src = base if cand == "base" else per[cand]
+        v = src.get(key)
+        if v not in (None, ""):
+            return v
+    return None
+
+
+def _is_grid(base, per):
+    for src in [base] + [per[b] for b in BP_ORDER]:
+        if "grid_columns_grid" in src or src.get("container_type") == "grid":
+            return True
+    return False
+
+
+def element_layout_rules(el, failed, parent=None):
     """All breakpoint rules for one element: {bp: {selector: {prop: val}}}."""
     settings = el.get("settings") or {}
     base, per = split_breakpoints(settings)
+    eltype = el.get("elType")
+    el_grid = _is_grid(base, per) if eltype == "container" else False
+    # Parent's effective direction per breakpoint (cascade chain; a
+    # container with no direction anywhere defaults to column, matching
+    # the direction rule its own generation emits at base), and whether
+    # the parent holds children inside a .e-con-inner wrapper (boxed
+    # containers do; full-width containers hold children directly, so
+    # wp-compat's generic inner-child flex rule cannot touch them).
+    p_dirs = {}
+    p_inner = False
+    if parent is not None:
+        pbase, pper = split_breakpoints(parent.get("settings") or {})
+        p_grid = _is_grid(pbase, pper) if parent.get("elType") == "container" else False
+        for bp in ["base"] + BP_ORDER:
+            d = _chain_get(pbase, pper, bp, "flex_direction")
+            if not d and parent.get("elType") == "container":
+                d = "grid" if p_grid else "column"
+            p_dirs[bp] = d
+        if parent.get("elType") == "container":
+            pcw = pbase.get("content_width") or pbase.get("boxed_width")
+            p_inner = not (isinstance(pcw, str) and pcw.strip() == "full")
     out = {}
+    base_self_has_flex = False
     # Round 3: a line-height smaller than the font-size only works for
     # single-line display text. The classic footer wordmark is 480px type
     # with a 200px line-height; harmless for the original one-word "Redox"
@@ -1714,8 +1844,19 @@ def element_layout_rules(el, failed):
     eff_fs = None
     orig_lh = None
     for bp, s in [("base", base)] + [(b, per[b]) for b in BP_ORDER]:
+        # This element's own effective direction/wrap at this breakpoint,
+        # for the column wrap default in extract_props.
+        s_dir = _chain_get(base, per, bp, "flex_direction")
+        if not s_dir and eltype == "container":
+            s_dir = "grid" if el_grid else "column"
+        s_wrap = _chain_get(base, per, bp, "flex_wrap")
         self_p, inner_p, head_p, inner_max = extract_props(
-            s, el.get("elType"), failed, base_settings=base, is_base=(bp == "base"))
+            s, eltype, failed, base_settings=base, is_base=(bp == "base"),
+            parent_dir=p_dirs.get(bp), self_dir=s_dir, self_wrap=s_wrap,
+            parent_inner=p_inner,
+            cancel_base_flex=(bp != "base" and base_self_has_flex))
+        if bp == "base":
+            base_self_has_flex = "flex" in self_p
         if not (self_p or inner_p or head_p or inner_max):
             continue
         eid = el.get("id")
@@ -1751,14 +1892,14 @@ def element_layout_rules(el, failed):
 
 
 def generate_layout_css(failed):
-    els = collect_layout_elements()
+    els, parents = collect_layout_elements()
     by_bp = {"base": {}, "widescreen": {}, "laptop": {}, "tablet_extra": {},
              "tablet": {}, "mobile_extra": {}, "mobile": {}}
     custom_blocks = []
     covered, with_layout = 0, 0
     per_page_coverage = {}
     for el in els:
-        rules = element_layout_rules(el, failed)
+        rules = element_layout_rules(el, failed, parents.get(id(el)))
         has_layout = element_has_layout(el.get("settings") or {})
         if has_layout:
             with_layout += 1
@@ -2009,7 +2150,7 @@ def main():
         "CSS comments were stripped from copied theme stylesheets.",
         "The theme ad/ folder is not shipped; no kept page references it.",
         "Post pages render title, date, categories, featured image and body only; the theme related-posts block is not reproduced.",
-        "Generated layout CSS converts per-element width, flex, grid, gap, padding, margin, background, border, typography, position and height settings from demo data, including scoped custom CSS. Grid containers are converted (columns, gaps, justification) with a 3-column preset default where the source sets no columns. Not converted: background overlays, transforms/animations, and widget-internal spacings (icon_gap, image_space, title_gap); container height settings become min-height; nested widget typography groups apply to the wrapper; responsive visibility classes use reconstructed device ranges.",
+        "Generated layout CSS converts per-element width, flex, grid, gap, padding, margin, background, border, typography, position and height settings from demo data, including scoped custom CSS. Grid containers are converted (columns, gaps, justification) with a 3-column preset default where the source sets no columns. Width emission is parent-direction-aware: in a column parent, width is emitted without a flex-basis (a percent basis would resolve against parent height); items of column parents get flex 0 1 auto instead of the generic 1 1 280px inner-child rule; column containers with no wrap setting get flex-wrap nowrap. Not converted: background overlays, transforms/animations, and widget-internal spacings (icon_gap, image_space, title_gap); container height settings become min-height; nested widget typography groups apply to the wrapper; responsive visibility classes use reconstructed device ranges.",
         "Per-element layout CSS is generated by scripts/build.py into public/assets/css/generated-layout.css and linked after the theme stylesheets.",
     ])
     manifest = {
