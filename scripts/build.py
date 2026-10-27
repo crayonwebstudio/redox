@@ -91,12 +91,22 @@ def parse_xml():
             "menu_items": menu_items, "offcanvas": offcanvas}
 
 
-DATA = parse_xml()
-BY_ID = DATA["by_id"]
-PAGES = DATA["pages"]
-POSTS = sorted(DATA["posts"], key=lambda p: p["slug"])
-HEADERS = DATA["headers"]
-FOOTERS = DATA["footers"]
+# NOTE: this must not parse XML at import time when the source is absent.
+# The container build runs this script via prebuild with no demo sources, and
+# the old code crashed here (FileNotFoundError) before main()'s guard could
+# run, which failed the whole deploy. When XML is missing, use empty data so
+# import succeeds and main() returns early, keeping committed generated files.
+if XML.exists():
+    DATA = parse_xml()
+    BY_ID = DATA["by_id"]
+    PAGES = DATA["pages"]
+    POSTS = sorted(DATA["posts"], key=lambda p: p["slug"])
+    HEADERS = DATA["headers"]
+    FOOTERS = DATA["footers"]
+else:
+    DATA = {"by_id": {}, "pages": {}, "posts": [], "headers": {}, "footers": {},
+            "attachments": {}, "menu_items": [], "offcanvas": None}
+    BY_ID, PAGES, POSTS, HEADERS, FOOTERS = {}, {}, [], {}, {}
 
 # URL maps: page/post id -> clean URL. Removed and unknown -> "/".
 ID_URL = {}

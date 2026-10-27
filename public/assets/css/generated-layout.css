@@ -5956,9 +5956,6 @@
 .elementor-element-9190644 #rd-team-section-01 .rd-team-img {
     transition: all 0.5s !important;
 }
-.elementor-element-c0b0c6b .ax-ca-footer-form .footer-area-inner-page .subscribe-form .input-field {
-	background-color: #F4EDE7;
-}
 @media (min-width:1300px) and (max-width:1500px) {
 .elementor-element-fec0f43 .elementor-16156 .elementor-element.elementor-element-fec0f43 .elementor-heading-title {
     font-size: 380px;
@@ -5968,6 +5965,9 @@
     background: rgba(255, 255, 255, 0.2) !important;
     padding: 5px !important;
     border-radius: 100px !important;
+}
+.elementor-element-c0b0c6b .ax-ca-footer-form .footer-area-inner-page .subscribe-form .input-field {
+	background-color: #F4EDE7;
 }
 .elementor-element-e9303a4 .ax-offcan-list a i {
     border: 1px solid;
