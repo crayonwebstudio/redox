@@ -1306,7 +1306,7 @@ def local_bg_url(url, failed):
     return url
 
 
-def extract_props(s, eltype, failed):
+def extract_props(s, eltype, failed, base_settings=None, is_base=False):
     """One breakpoint's settings -> (self, inner, heading, inner_max) prop dicts."""
     self_p, inner_p, head_p = {}, {}, {}
     inner_max = None
@@ -1330,23 +1330,47 @@ def extract_props(s, eltype, failed):
     fas = s.get("_flex_align_self")
     if fas:
         self_p["align-self"] = fas
-    # Container flex layout (applies to the inner flex row).
+    # Container flex layout. Rendered HTML puts children inside .e-con-inner
+    # ONLY for boxed containers; full-width containers hold children directly
+    # (verified across all dist pages: every boxed container has an inner
+    # wrapper, no full-width container does). So flex props must target the
+    # inner wrapper for boxed containers and the element itself for
+    # full-width ones. Boxed-ness comes from base settings because the
+    # rendered HTML is fixed, not per breakpoint: content_width unset means
+    # boxed (Elementor default), "full" means full width.
     if eltype == "container":
+        cw_base = (base_settings or {}).get("content_width")
+        if cw_base is None:
+            cw_base = (base_settings or {}).get("boxed_width")
+        if cw_base is None:
+            cw_base = s.get("content_width") or s.get("boxed_width")
+        boxed = not (isinstance(cw_base, str) and cw_base.strip() == "full")
+        target = inner_p if boxed else self_p
+        is_grid = ("grid_columns_grid" in s or
+                   (base_settings is not None and "grid_columns_grid" in base_settings))
         fd = s.get("flex_direction")
+        if not fd and is_base and not is_grid:
+            # No direction set anywhere: containers stack children vertically.
+            # Evidence from the demo data itself: unset containers' children
+            # almost never carry width settings (187 of 196 multi-child unset
+            # containers have no child with a width), matching explicit
+            # column containers (2 of 78 children with widths) rather than
+            # explicit row containers (216 of 384 children with widths).
+            fd = "column"
         if fd:
-            inner_p["flex-direction"] = fd
+            target["flex-direction"] = fd
         fw = s.get("flex_wrap")
         if fw:
-            inner_p["flex-wrap"] = fw
+            target["flex-wrap"] = fw
         ai = s.get("flex_align_items") or s.get("content_vertical_alignment")
         if ai:
-            inner_p["align-items"] = ai
+            target["align-items"] = ai
         jc = s.get("flex_justify_content")
         if jc:
-            inner_p["justify-content"] = jc
+            target["justify-content"] = jc
         gv = gap_value(s.get("flex_gap") if s.get("flex_gap") is not None else s.get("gap"))
         if gv:
-            inner_p["gap"] = gv
+            target["gap"] = gv
     # Spacing.
     for key in ("padding", "_padding"):
         self_p.update(box_longhands("padding", s.get(key)))
@@ -1552,7 +1576,8 @@ def element_layout_rules(el, failed):
     base, per = split_breakpoints(settings)
     out = {}
     for bp, s in [("base", base)] + [(b, per[b]) for b in BP_ORDER]:
-        self_p, inner_p, head_p, inner_max = extract_props(s, el.get("elType"), failed)
+        self_p, inner_p, head_p, inner_max = extract_props(
+            s, el.get("elType"), failed, base_settings=base, is_base=(bp == "base"))
         if not (self_p or inner_p or head_p or inner_max):
             continue
         eid = el.get("id")

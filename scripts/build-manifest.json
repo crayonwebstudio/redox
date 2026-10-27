@@ -163,10 +163,10 @@
   "images_failed": [],
   "unknown_page_links": {},
   "widget_counts": {
-    "arrox-header-8": 1,
     "arrox-header-2": 1,
-    "arrox-header-3": 1,
+    "arrox-header-8": 1,
     "arrox-header": 1,
+    "arrox-header-3": 1,
     "text-editor": 50,
     "rt-footer-anchor": 12,
     "shortcode": 3,
@@ -202,13 +202,13 @@
     "arrox-invert-text": 6,
     "arrox_services_vertical_slider": 1
   },
-  "generated_layout_css_bytes": 786193,
-  "generated_layout_css_rules": 5660,
+  "generated_layout_css_bytes": 776065,
+  "generated_layout_css_rules": 5092,
   "layout_coverage": {
-    "rules": 5660,
+    "rules": 5092,
     "elements": 1509,
     "with_layout": 1368,
-    "covered": 1400,
+    "covered": 1401,
     "custom_blocks": 55,
     "per_page": {
       "digital-agency": {

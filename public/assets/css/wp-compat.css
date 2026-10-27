@@ -22,7 +22,11 @@
 
 /* Header */
 .header-area, .header-area-2, .header-area-3, .header-area-8 { background: #fff; border-bottom: 1px solid #eee; position: relative; z-index: 100; }
-.header-area__inner, .header-area-2__inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1320px; margin: 0 auto; padding: 18px 15px; }
+/* NOTE: the rendered header widgets actually use header-area-1 and
+   header-area--2/--3/--8 (double hyphen) classes, which previously had no
+   rule anywhere, so logo/nav/button stacked vertically. Cover them here. */
+.header-area-1, .header-area--2, .header-area--3, .header-area--8 { background: #fff; border-bottom: 1px solid #eee; position: relative; z-index: 100; }
+.header-area__inner, .header-area-2__inner, .header-area-1__inner, .header-area--2__inner, .header-area--3__inner, .header-area--8__inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1320px; margin: 0 auto; padding: 18px 15px; }
 .header__logo img { max-height: 48px; width: auto; }
 .arrox-nav-menu { display: flex; flex-wrap: wrap; gap: 8px 28px; list-style: none; margin: 0; padding: 0; }
 .arrox-nav-menu li { position: relative; list-style: none; }
