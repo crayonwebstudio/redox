@@ -1409,7 +1409,9 @@ def extract_props(s, eltype, failed, base_settings=None, is_base=False):
         boxed = not (isinstance(cw_base, str) and cw_base.strip() == "full")
         target = inner_p if boxed else self_p
         is_grid = ("grid_columns_grid" in s or
-                   (base_settings is not None and "grid_columns_grid" in base_settings))
+                   (base_settings is not None and "grid_columns_grid" in base_settings) or
+                   s.get("container_type") == "grid" or
+                   (base_settings is not None and base_settings.get("container_type") == "grid"))
         fd = s.get("flex_direction")
         if not fd and is_base and not is_grid:
             # No direction set anywhere: containers stack children vertically.
@@ -1433,6 +1435,44 @@ def extract_props(s, eltype, failed, base_settings=None, is_base=False):
         gv = gap_value(s.get("flex_gap") if s.get("flex_gap") is not None else s.get("gap"))
         if gv:
             target["gap"] = gv
+        # Round 4: grid containers. Previously nothing rendered them as
+        # grids at all (no display:grid anywhere), so grid children stacked
+        # as full-width blocks; the classic hero's counter row and thumb
+        # row are grid containers. Columns come from grid_columns_grid
+        # (custom size string, or a count for fr units); a grid container
+        # with no columns setting gets the preset default of 3 columns.
+        # Gaps come from grid_gaps. Props target the same element as the
+        # flex props (inner wrapper for boxed containers, the element
+        # itself for full-width ones), since that is where the children
+        # actually sit.
+        if is_grid:
+            target["display"] = "grid"
+            cols = None
+            gcg = s.get("grid_columns_grid")
+            if isinstance(gcg, dict):
+                unit = (gcg.get("unit") or "").strip()
+                size = gcg.get("size")
+                if unit == "custom" and isinstance(size, str) and size.strip():
+                    cols = size.strip()
+                elif unit == "fr" and size not in (None, ""):
+                    try:
+                        cols = f"repeat({int(size)}, 1fr)"
+                    except (TypeError, ValueError):
+                        cols = None
+            if cols:
+                target["grid-template-columns"] = cols
+            elif is_base:
+                target["grid-template-columns"] = "repeat(3, 1fr)"
+            gg = s.get("grid_gaps")
+            ggv = gap_value(gg) if isinstance(gg, dict) else None
+            if ggv:
+                target["gap"] = ggv
+            gjc = s.get("grid_justify_content")
+            if gjc:
+                target["justify-content"] = gjc
+            gac = s.get("grid_align_content")
+            if gac:
+                target["align-content"] = gac
     # Spacing.
     for key in ("padding", "_padding"):
         self_p.update(box_longhands("padding", s.get(key)))
@@ -1579,6 +1619,7 @@ def scope_custom_css(css, eid, failed):
 LAYOUT_KEY_FAMILIES = ("width", "_element_width", "_flex_size", "_flex_order",
                        "_flex_align_self", "flex_direction", "flex_wrap",
                        "flex_align_items", "flex_justify_content", "flex_gap",
+                       "grid_",
                        "gap", "padding", "_padding", "margin", "_margin",
                        "background_", "border_", "typography_", "title_color",
                        "align", "alignment", "_position", "_offset_", "z_index",
@@ -1968,7 +2009,7 @@ def main():
         "CSS comments were stripped from copied theme stylesheets.",
         "The theme ad/ folder is not shipped; no kept page references it.",
         "Post pages render title, date, categories, featured image and body only; the theme related-posts block is not reproduced.",
-        "Generated layout CSS converts per-element width, flex, gap, padding, margin, background, border, typography, position and height settings from demo data, including scoped custom CSS. Not converted: grid_gaps, background overlays, transforms/animations, and widget-internal spacings (icon_gap, image_space, title_gap); container height settings become min-height; nested widget typography groups apply to the wrapper; responsive visibility classes use reconstructed device ranges.",
+        "Generated layout CSS converts per-element width, flex, grid, gap, padding, margin, background, border, typography, position and height settings from demo data, including scoped custom CSS. Grid containers are converted (columns, gaps, justification) with a 3-column preset default where the source sets no columns. Not converted: background overlays, transforms/animations, and widget-internal spacings (icon_gap, image_space, title_gap); container height settings become min-height; nested widget typography groups apply to the wrapper; responsive visibility classes use reconstructed device ranges.",
         "Per-element layout CSS is generated by scripts/build.py into public/assets/css/generated-layout.css and linked after the theme stylesheets.",
     ])
     manifest = {

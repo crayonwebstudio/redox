@@ -26,14 +26,19 @@
    header-area--2/--3/--8 (double hyphen) classes, which previously had no
    rule anywhere, so logo/nav/button stacked vertically. Cover them here. */
 .header-area-1, .header-area--2, .header-area--3 { background: #fff; border-bottom: 1px solid #eee; position: relative; z-index: 100; }
-/* Round 3: header-area--8 is the classic page's header (template 15849),
+/* Round 4: header-area--8 is the classic page's header (template 15849),
    used nowhere else. Its widget settings demand a dark header: light logo,
-   white toggle icon, white menu title/arrow colors. Forcing a white
-   background made the logo invisible. It is a transparent header overlaid
-   on the page's dark hero (whose 200px top padding reserves room for it);
-   top-level links are white, dropdown links keep the dark-on-white style. */
-.header-area--8 { position: absolute; top: 0; left: 0; right: 0; z-index: 100; background: transparent; border-bottom: none; }
+   white toggle icon, white menu title/arrow colors. Round 3 made it a
+   transparent overlay, but in practice the band behind it renders white,
+   so the white logo and white nav disappeared (and the light-grey toggle
+   button background made the white toggle icon faint). Give the bar its
+   own dark background in normal flow, seamless against the page's dark
+   hero (#222222), so logo, nav, and toggle are visible regardless of
+   what sits behind the header. Top-level links are white, dropdown links
+   keep the dark-on-white style. Homepage headers are untouched. */
+.header-area--8 { position: relative; z-index: 100; background: #222222; border-bottom: none; }
 .header-area--8 .main-menu > ul > li > a { color: #fff; }
+.header-area--8 .side-toggle { background: transparent; }
 .header-area__inner, .header-area-2__inner, .header-area-1__inner, .header-area--2__inner, .header-area--3__inner, .header-area--8__inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1320px; margin: 0 auto; padding: 18px 15px; }
 .header__logo img { max-height: 48px; width: auto; }
 .arrox-nav-menu { display: flex; flex-wrap: wrap; gap: 8px 28px; list-style: none; margin: 0; padding: 0; }
