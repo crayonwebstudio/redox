@@ -433,12 +433,21 @@ def render_widget(d):
                 + img_tag(media_url(s.get("arrox_circle_icon")), "circle icon")
                 + img_tag(media_url(s.get("arrox_circle_text")), "circle text") + "</div>")
     if wt == "arrox-heading":
+        # Round 3: the original joins title, icon span and second title with
+        # spaces ("with [icon] quality"); concatenating without them produced
+        # "withquality" in the browser.
         title = s.get("arrox_hero_title", "") or ""
         sec = s.get("arrox_hero_sec_title", "") or ""
         img = img_tag(media_url(s.get("arrox_image")), "")
+        parts = []
+        if title:
+            parts.append(title)
+        if img:
+            parts.append(f"<span>{img}</span>")
+        if sec:
+            parts.append(sec)
         return ('<div class="section-header rd-da-hero-title arrox-el-section"><div class="section-title-wrapper">'
-                f'<div class="title-wrapper"><h2 class="section-title arrox-el-title font-instrumentsans-medium char-anim">{title}'
-                + (f"<span>{img}</span>" if img else "") + f"{sec}</h2></div></div></div>")
+                f'<div class="title-wrapper"><h2 class="section-title arrox-el-title font-instrumentsans-medium char-anim">{" ".join(parts)}</h2></div></div></div>')
     if wt == "arrox_heading":
         title = s.get("arrox_title", "") or ""
         btn_text = s.get("heading_button_text", "") or ""
@@ -480,8 +489,19 @@ def render_widget(d):
         items = "".join(f"<li>{i.get('news_ticker_title', '')}</li>" for i in (s.get("news_ticker_list") or []) if isinstance(i, dict))
         return f'<div class="news-ticker arrox-el-section"><ul>{items}</ul></div>'
     if wt == "arrox_career_text_slider":
-        items = "".join(f'<span class="career-title">{i.get("career_title", "")}</span>' for i in (s.get("career_slider") or []) if isinstance(i, dict))
-        return f'<div class="career-text-slider arrox-el-section">{items}</div>'
+        # Round 3: the original widget (layout-1, the only option and the
+        # default) renders a Swiper slider of titles, not bare spans. The bare
+        # spans rendered with no separator, so titles ran together
+        # ("Branding DesignCreative Design..."). The Swiper structure lets the
+        # site's vanilla Swiper init lay them out as a horizontal row.
+        if (s.get("design_style") or "layout-1") != "layout-1":
+            return ""
+        slides = "".join(
+            f'<div class="swiper-slide"><div class="slider-content redox-el-content">'
+            f'<h6 class="slider-title redox-el-title">{i.get("career_title", "")}</h6></div></div>'
+            for i in (s.get("career_slider") or []) if isinstance(i, dict))
+        return (f'<div class="swiper slider-wrap h1-project__brand-slider project-h1-brand-slider arrox-el-section">'
+                f'<div class="swiper-wrapper">{slides}</div></div>')
     if wt == "arrox-invert-text":
         return f'<div class="service-content-wrapper arrox-el-section"><div class="service-content"><div class="section-info-wrapper"><div class="text-wrapper"><p class="text text-invert arrox-el-text">{s.get("arrox_invert_text", "")}</p></div></div></div></div>'
     if wt == "rt-image-portfolio":
@@ -510,14 +530,49 @@ def render_widget(d):
                        + f'<p class="branding-text">{i.get("branding_slider_text", "")}</p></div></div>')
         return f'<div class="branding-slider arrox-el-section"><div class="swiper"><div class="swiper-wrapper">{slides}</div></div></div>'
     if wt == "rt-banner":
-        feats = ""
+        # Round 3: rewritten to the original widget's structure
+        # (quote-hover-image.php). The old renderer invented .banner-feature
+        # divs, for which no shipped CSS exists, and rendered text_02
+        # ("Global Service") for text items, which the original never outputs
+        # (text items render text_01 only; text_02 belongs to image items).
+        # That produced the jammed "uniqueGlobal Service" text and the
+        # collapsed block. The original renders one h2 whose inline words
+        # form the sentence, with shape images inside .shape-1 spans; the
+        # shipped theme CSS (.productivity-area) styles exactly that
+        # structure, including hover-reveal of the shape images. Desktop
+        # per-item top/left offsets are emitted inline on the image (theme
+        # CSS supplies position:absolute); responsive variants of those
+        # offsets are not converted.
+        parts = []
         for i in (s.get("arrox_features_list") or []):
             if not isinstance(i, dict):
                 continue
-            feats += ('<div class="banner-feature">'
-                      + img_tag(media_url(i.get("image_icon")), "")
-                      + f'<span>{i.get("arrox_pd_text_01", "")}</span><span>{i.get("arrox_pd_text_02", "")}</span></div>')
-        return f'<div class="banner-features arrox-el-section">{feats}</div>'
+            if (i.get("icon_type") or "image") == "text":
+                t1 = i.get("arrox_pd_text_01", "") or ""
+                if t1:
+                    parts.append(t1)
+            else:
+                img = img_tag(media_url(i.get("image_icon")), "")
+                t2 = i.get("arrox_pd_text_02", "") or ""
+                if not img and not t2:
+                    continue
+                style = ""
+                top = size_value(i.get("top"), "top")
+                left = size_value(i.get("left"), "left")
+                if top:
+                    style += f"top:{top};"
+                if left:
+                    style += f"left:{left};"
+                if img and style:
+                    img = img[:-1] + f' style="{style}">'
+                rid = i.get("_id", "") or ""
+                cls = f"shape-1 elementor-repeater-item-{rid}" if rid else "shape-1"
+                parts.append(f'<span class="{cls}">{img}{t2}</span>')
+        inner = " ".join(parts)
+        return ('<section class="productivity-area"><div class="container large"><div class="productivity-area-inner">'
+                '<div class="section-content rt-el-section section-spacing"><div class="section-title-wrapper"><div class="title-wrapper">'
+                f'<h2 class="section-title font-instrumentsans-medium word-anim arrox-el-title">{inner}</h2>'
+                "</div></div></div></div></div></section>")
     if wt == "rt-cta-work":
         text = s.get("rt_cta_text", "") or ""
         href = demo_url_to_local(s.get("rt_cta_text_url", "")) or "/contact/"
@@ -1314,6 +1369,13 @@ def extract_props(s, eltype, failed, base_settings=None, is_base=False):
     w = s.get("width") if s.get("width") is not None else s.get("_element_width")
     wv = size_value(w, "width") if w is not None else None
     if wv:
+        # Round 3: a percentage width above 100% is a data artifact, never a
+        # real column width (the only instance in the demo is the classic
+        # hero section at 1880%, which pushed its content miles off-screen
+        # and left two screens of solid black). Clamp to 100%.
+        m = re.match(r"^(\d+(?:\.\d+)?)%$", wv)
+        if m and float(m.group(1)) > 100:
+            wv = "100%"
         if wv in ("auto", "initial", "inherit", "unset"):
             self_p["width"] = wv
         else:
@@ -1570,11 +1632,46 @@ def collect_layout_elements():
     return els
 
 
+def _resolve_px(val, fs_px):
+    """A font-size/line-height CSS value resolved to px, or None if it
+    cannot be resolved (%, vw, calc, ...). Unitless and em line-heights are
+    factors of the element's font-size."""
+    if val is None:
+        return None
+    v = str(val).strip()
+    m = re.match(r"^(-?\d+(?:\.\d+)?)px$", v)
+    if m:
+        return float(m.group(1))
+    m = re.match(r"^(-?\d+(?:\.\d+)?)rem$", v)
+    if m:
+        return float(m.group(1)) * 16
+    if fs_px:
+        m = re.match(r"^(-?\d+(?:\.\d+)?)em$", v)
+        if m:
+            return float(m.group(1)) * fs_px
+        m = re.match(r"^(-?\d+(?:\.\d+)?)$", v)
+        if m:
+            return float(m.group(1)) * fs_px
+    return None
+
+
 def element_layout_rules(el, failed):
     """All breakpoint rules for one element: {bp: {selector: {prop: val}}}."""
     settings = el.get("settings") or {}
     base, per = split_breakpoints(settings)
     out = {}
+    # Round 3: a line-height smaller than the font-size only works for
+    # single-line display text. The classic footer wordmark is 480px type
+    # with a 200px line-height; harmless for the original one-word "Redox"
+    # but catastrophic once branding made it two words ("Woodwolf
+    # Digital"), whose lines collided. At every breakpoint that carries
+    # typography, emit an explicit line-height equal to the larger of the
+    # original effective line-height and the effective font-size, so
+    # multi-line text can never overlap while breakpoints that shrink the
+    # font keep their original (looser) spacing instead of inheriting a
+    # clamped base value. Equal or larger line-heights are untouched.
+    eff_fs = None
+    orig_lh = None
     for bp, s in [("base", base)] + [(b, per[b]) for b in BP_ORDER]:
         self_p, inner_p, head_p, inner_max = extract_props(
             s, el.get("elType"), failed, base_settings=base, is_base=(bp == "base"))
@@ -1593,6 +1690,22 @@ def element_layout_rules(el, failed):
             sels[f"{base_sel}.e-con-boxed > .e-con-inner"] = {"max-width": inner_max}
         if sels:
             out[bp] = sels
+            for d in (self_p, head_p):
+                if not d or ("font-size" not in d and "line-height" not in d):
+                    continue
+                fs = _resolve_px(d.get("font-size"), None) or eff_fs
+                lh = _resolve_px(d.get("line-height"), fs)
+                if fs:
+                    eff_fs = fs
+                if lh is not None:
+                    orig_lh = lh
+                if eff_fs and orig_lh is not None and orig_lh < eff_fs:
+                    d["line-height"] = f"{eff_fs:g}px"
+                elif eff_fs and orig_lh is not None and "line-height" not in d:
+                    # Font shrank below the inherited line-height: pin the
+                    # original spacing so it does not inherit a clamped
+                    # base value from an earlier breakpoint.
+                    d["line-height"] = f"{orig_lh:g}px"
     return out
 
 

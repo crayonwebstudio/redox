@@ -25,7 +25,15 @@
 /* NOTE: the rendered header widgets actually use header-area-1 and
    header-area--2/--3/--8 (double hyphen) classes, which previously had no
    rule anywhere, so logo/nav/button stacked vertically. Cover them here. */
-.header-area-1, .header-area--2, .header-area--3, .header-area--8 { background: #fff; border-bottom: 1px solid #eee; position: relative; z-index: 100; }
+.header-area-1, .header-area--2, .header-area--3 { background: #fff; border-bottom: 1px solid #eee; position: relative; z-index: 100; }
+/* Round 3: header-area--8 is the classic page's header (template 15849),
+   used nowhere else. Its widget settings demand a dark header: light logo,
+   white toggle icon, white menu title/arrow colors. Forcing a white
+   background made the logo invisible. It is a transparent header overlaid
+   on the page's dark hero (whose 200px top padding reserves room for it);
+   top-level links are white, dropdown links keep the dark-on-white style. */
+.header-area--8 { position: absolute; top: 0; left: 0; right: 0; z-index: 100; background: transparent; border-bottom: none; }
+.header-area--8 .main-menu > ul > li > a { color: #fff; }
 .header-area__inner, .header-area-2__inner, .header-area-1__inner, .header-area--2__inner, .header-area--3__inner, .header-area--8__inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 1320px; margin: 0 auto; padding: 18px 15px; }
 .header__logo img { max-height: 48px; width: auto; }
 .arrox-nav-menu { display: flex; flex-wrap: wrap; gap: 8px 28px; list-style: none; margin: 0; padding: 0; }
@@ -104,3 +112,37 @@ button[type="submit"], input[type="submit"], .submit-btn { background: #111; col
   .e-con-inner { flex-direction: column; }
   .swiper-slide { width: 260px; }
 }
+
+/* Round 3: news ticker. The original scrolled via the jQuery carouselTicker
+   plugin, which is not shipped; without it the list rendered as a plain
+   vertical list. A pure-CSS marquee reproduces the horizontal strip: the
+   12 identical items plus uniform right margins make a -50% shift loop
+   seamlessly, and hovering pauses it. */
+.news-ticker { overflow: hidden; }
+.news-ticker ul { display: flex; flex-wrap: nowrap; width: max-content; margin: 0; padding: 0; list-style: none; animation: wp-ticker-scroll 28s linear infinite; }
+.news-ticker li { white-space: nowrap; margin-right: 3rem; }
+.news-ticker:hover ul { animation-play-state: paused; }
+@keyframes wp-ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Round 3: Elementor icon lists. No Elementor frontend CSS is shipped, so
+   these lists fell back to browser/bootstrap defaults (bullets, 2rem
+   indent). Elementor renders them unbulleted with no indent. */
+.elementor-icon-list-items { list-style: none; margin: 0; padding: 0; }
+.elementor-icon-list-item { list-style: none; }
+
+/* Round 3 leftover: the homepage "Let's Work" CTA sits on a light grey
+   section (#F8F8F8 in source) but no shipped rule sets its link color, so
+   it can render near-invisible if it inherits white. Dark text is the only
+   readable option on this background. (The white appearance itself could
+   not be traced to a source rule; this is a defensive fix, not a proven
+   root cause.) */
+.cta-area .section-title a { color: #111; }
+
+/* Round 3: classic footer wordmark. Branding replaced the original
+   one-word "Redox" with the two-word "Woodwolf Digital", so at the
+   designed 480px the words overflowed the viewport as well as colliding
+   (see the generator's line-height clamp). Scale the wordmark to the
+   viewport so the longest word fits at any width, with matching leading.
+   Higher specificity than the generated rules so it wins at every
+   breakpoint without touching the generator output. */
+.elementor-element-fec0f43.end .elementor-heading-title { font-size: 14vw; line-height: 1em; }
