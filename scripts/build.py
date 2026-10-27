@@ -682,12 +682,25 @@ def render_element(d):
 
 
 def render_placeholders(html):
-    """Replace [elementor-element] tokens with rendered widget HTML."""
+    """Replace [elementor-element] tokens with rendered widget HTML.
+
+    The output is wrapped in the element's own elementor-element-<id> div
+    so generated per-element layout rules have a target to attach to (the
+    placeholder tokens carry no wrapper of their own).
+    """
     def repl(m):
         d = decode_placeholder(m)
         if d is None:
             return ""
-        return render_element(d)
+        out = render_element(d)
+        if not out.strip():
+            return ""
+        eid = d.get("id")
+        wt = d.get("widgetType", "")
+        if eid:
+            return (f'<div class="elementor-element elementor-element-{eid} '
+                    f'elementor-widget elementor-widget-{wt}">{out}</div>')
+        return out
     return PLACEHOLDER_RE.sub(repl, html)
 
 # ---------------------------------------------------------------- HTML cleaning
@@ -1028,12 +1041,605 @@ def download_images(urls):
                 REPORT["failed_images"].append(bad)
     return failed
 
+# ---------------------------------------------------------------- generated layout CSS
+# Per-element layout rules derived from the demo page settings. The live
+# theme CSS only carries generic rules, so without these the pages lose
+# their column widths, gaps, padding, typography and absolute positioning.
+# The output file is plain CSS: no builder JSON, no remote URLs, no
+# data attributes are reintroduced anywhere.
+import zipfile
+
+KIT_ZIP = (Path.home() / "workspace" / "redox-wp-source" / "redox-106"
+           / "themeforest-redox-creative-agency-and-portfolio-wordpress-theme"
+           / "sample-data" / "elementor-kit.zip")
+BP_ORDER = ["widescreen", "laptop", "tablet_extra", "tablet", "mobile_extra", "mobile"]
+BP_MEDIA = {
+    "widescreen": "@media (min-width: 2400px)",
+    "laptop": "@media (max-width: 1366px)",
+    "tablet_extra": "@media (max-width: 1200px)",
+    "tablet": "@media (max-width: 1024px)",
+    "mobile_extra": "@media (max-width: 880px)",
+    "mobile": "@media (max-width: 767px)",
+}
+BP_SUFFIXES = ["tablet_extra", "mobile_extra", "widescreen", "tablet", "mobile", "laptop"]
+TYPO_MAP = (("font-family", "typography_font_family"),
+            ("font-weight", "typography_font_weight"),
+            ("font-size", "typography_font_size"),
+            ("line-height", "typography_line_height"),
+            ("letter-spacing", "typography_letter_spacing"),
+            ("text-transform", "typography_text_transform"))
+
+
+def load_globals():
+    colors, typos = {}, {}
+    try:
+        with zipfile.ZipFile(KIT_ZIP) as z:
+            settings = json.loads(z.read("site-settings.json")).get("settings", {}) or {}
+        for group in ("system_colors", "custom_colors"):
+            for c in settings.get(group, []) or []:
+                if c.get("_id") and c.get("color"):
+                    colors[c["_id"]] = c["color"]
+        for group in ("system_typography", "custom_typography"):
+            for t in settings.get(group, []) or []:
+                if t.get("_id"):
+                    typos[t["_id"]] = t
+    except Exception as e:
+        warn(f"kit globals load failed: {e}")
+    return colors, typos
+
+
+GLOBAL_COLORS, GLOBAL_TYPOS = load_globals()
+
+
+def resolve_color_ref(value):
+    if isinstance(value, str):
+        m = re.match(r"globals/colors\?id=(.+)$", value.strip())
+        if m:
+            return GLOBAL_COLORS.get(m.group(1))
+    return None
+
+
+def typo_props_from_global(gid):
+    t = GLOBAL_TYPOS.get(gid)
+    if not t:
+        return {}
+    out = {}
+    if t.get("typography_font_family"):
+        out["font-family"] = t["typography_font_family"]
+    if t.get("typography_font_weight"):
+        out["font-weight"] = t["typography_font_weight"]
+    for key, css in (("typography_font_size", "font-size"),
+                     ("typography_line_height", "line-height"),
+                     ("typography_letter_spacing", "letter-spacing"),
+                     ("typography_text_transform", "text-transform")):
+        v = t.get(key)
+        if v:
+            sv = size_value(v, css)
+            if sv:
+                out[css] = sv
+    return out
+
+
+def size_value(v, prop=""):
+    if v is None:
+        return None
+    if isinstance(v, (int, float)):
+        return str(v) if prop == "line-height" else f"{v}px"
+    if isinstance(v, str):
+        v = v.strip()
+        return v or None
+    if isinstance(v, dict):
+        size = v.get("size")
+        if size is None or size == "":
+            return None
+        unit = v.get("unit") or ""
+        if prop == "line-height" and not unit:
+            return str(size)
+        return f"{size}{unit}"
+    return None
+
+
+def dim_value(side_val, unit, prop=""):
+    """One side of a dimension dict: bare numbers take the dict's unit."""
+    if side_val is None or side_val == "":
+        return None
+    s = str(side_val).strip()
+    if s in ("0", "0.0", "-0"):
+        return "0"
+    if re.search(r"(px|%|em|rem|vw|vh|vmin|vmax|ch|ex|cm|mm|in|pt|pc)$", s):
+        return s
+    if prop == "line-height":
+        return s
+    return f"{s}{unit or 'px'}"
+
+
+def box_longhands(prop, v):
+    """Padding/margin/border-width dict -> individual longhand props."""
+    if not isinstance(v, dict):
+        return {}
+    out = {}
+    size = v.get("size")
+    if size not in (None, "") and v.get("isLinked"):
+        sv = size_value(v, prop)
+        if sv:
+            for side in ("top", "right", "bottom", "left"):
+                out[f"{prop}-{side}"] = sv
+            return out
+    unit = v.get("unit") or "px"
+    for side in ("top", "right", "bottom", "left"):
+        sv = dim_value(v.get(side), unit, prop)
+        if sv:
+            out[f"{prop}-{side}"] = sv
+    return out
+
+
+def radius_value(v):
+    if not isinstance(v, dict):
+        return None
+    parts = []
+    unit = v.get("unit") or "px"
+    for side in ("top", "right", "bottom", "left"):
+        sv = dim_value(v.get(side), unit, "border-radius")
+        parts.append(sv if sv else "0")
+    if all(p == "0" for p in parts):
+        return None
+    return " ".join(parts)
+
+
+def gap_value(v):
+    if not isinstance(v, dict):
+        return None
+    unit = v.get("unit") or "px"
+    size = v.get("size")
+    if size not in (None, ""):
+        return f"{size}{unit}"
+    row, col = v.get("row"), v.get("column")
+    if (row in (None, "")) and (col in (None, "")):
+        return None
+    r = f"{row}{unit}" if row not in (None, "") else "0"
+    c = f"{col}{unit}" if col not in (None, "") else "0"
+    return f"{r} {c}"
+
+
+def font_family_value(v):
+    if not isinstance(v, str) or not v.strip():
+        return None
+    v = v.strip()
+    if "," in v or v.startswith(("'", '"')):
+        return v
+    if " " in v:
+        return f"'{v}'"
+    return v
+
+
+def color_of(settings, key):
+    v = settings.get(key)
+    if isinstance(v, str) and v.strip():
+        return resolve_color_ref(v) or v
+    gl = settings.get("__globals__") or {}
+    g = gl.get(key)
+    if isinstance(g, str) and g.strip():
+        return resolve_color_ref(g)
+    return None
+
+
+def typo_props(settings):
+    """Direct typography_* keys plus nested *_typography_* groups and globals."""
+    out = {}
+    for css, key in TYPO_MAP:
+        v = settings.get(key)
+        if key == "typography_font_family":
+            fv = font_family_value(v) if isinstance(v, str) else None
+            if fv:
+                out["font-family"] = fv
+        elif v is not None and v != "":
+            if isinstance(v, str) and v.startswith("globals/typography"):
+                for k2, v2 in typo_props_from_global(v.split("id=", 1)[1]).items():
+                    out.setdefault(k2, v2)
+            else:
+                sv = size_value(v, css)
+                if sv:
+                    out[css] = sv
+    gl = settings.get("__globals__") or {}
+    for css, key in TYPO_MAP:
+        if css in out:
+            continue
+        g = gl.get(key)
+        if isinstance(g, str) and g.startswith("globals/typography"):
+            for k2, v2 in typo_props_from_global(g.split("id=", 1)[1]).items():
+                out.setdefault(k2, v2)
+    # Nested widget typography groups (title_typography_*, etc.): apply to
+    # the wrapper as an approximation; they inherit into the inner text.
+    nested = re.compile(r"^(.+)_typography_(font_family|font_size|font_weight|line_height|letter_spacing|text_transform)$")
+    for key, v in settings.items():
+        m = nested.match(key)
+        if not m or v is None or v == "":
+            continue
+        css = m.group(2).replace("_", "-")
+        if css in out:
+            continue
+        if css == "font-family":
+            fv = font_family_value(v) if isinstance(v, str) else None
+            if fv:
+                out[css] = fv
+        else:
+            sv = size_value(v, css)
+            if sv:
+                out[css] = sv
+    return out
+
+
+def split_breakpoints(settings):
+    base = {}
+    per = {bp: {} for bp in BP_ORDER}
+    for k, v in (settings or {}).items():
+        matched = None
+        for suf in BP_SUFFIXES:
+            if k.endswith("_" + suf):
+                matched = suf
+                break
+        if matched:
+            per[matched][k[:-(len(matched) + 1)]] = v
+        else:
+            base[k] = v
+    return base, per
+
+
+def local_bg_url(url, failed):
+    if not url or is_placeholder_image(url):
+        return None
+    if "wp.ravextheme.com" in url and "/wp-content/uploads/" in url:
+        local = uploads_local(url)
+        return "/assets/uploads/placeholder.svg" if local in failed else local
+    if url.startswith("http"):
+        return None
+    return url
+
+
+def extract_props(s, eltype, failed):
+    """One breakpoint's settings -> (self, inner, heading, inner_max) prop dicts."""
+    self_p, inner_p, head_p = {}, {}, {}
+    inner_max = None
+    # Width / flex item sizing.
+    w = s.get("width") if s.get("width") is not None else s.get("_element_width")
+    wv = size_value(w, "width") if w is not None else None
+    if wv:
+        if wv in ("auto", "initial", "inherit", "unset"):
+            self_p["width"] = wv
+        else:
+            self_p["flex"] = f"0 0 {wv}"
+            self_p["max-width"] = wv
+            self_p["width"] = wv
+            self_p["--width"] = wv
+    fs = s.get("_flex_size")
+    if fs not in (None, ""):
+        self_p["flex-grow"] = str(fs["size"] if isinstance(fs, dict) else fs)
+    fo = s.get("_flex_order") if s.get("_flex_order") is not None else s.get("order")
+    if fo not in (None, ""):
+        self_p["order"] = str(fo)
+    fas = s.get("_flex_align_self")
+    if fas:
+        self_p["align-self"] = fas
+    # Container flex layout (applies to the inner flex row).
+    if eltype == "container":
+        fd = s.get("flex_direction")
+        if fd:
+            inner_p["flex-direction"] = fd
+        fw = s.get("flex_wrap")
+        if fw:
+            inner_p["flex-wrap"] = fw
+        ai = s.get("flex_align_items") or s.get("content_vertical_alignment")
+        if ai:
+            inner_p["align-items"] = ai
+        jc = s.get("flex_justify_content")
+        if jc:
+            inner_p["justify-content"] = jc
+        gv = gap_value(s.get("flex_gap") if s.get("flex_gap") is not None else s.get("gap"))
+        if gv:
+            inner_p["gap"] = gv
+    # Spacing.
+    for key in ("padding", "_padding"):
+        self_p.update(box_longhands("padding", s.get(key)))
+    for key in ("margin", "_margin"):
+        self_p.update(box_longhands("margin", s.get(key)))
+    # Background.
+    bg = s.get("background_background") or s.get("_background_background")
+    if bg == "classic":
+        c = color_of(s, "background_color") or color_of(s, "_background_color")
+        if c:
+            self_p["background-color"] = c
+        img = s.get("background_image") or s.get("_background_image")
+        url = local_bg_url(media_url(img), failed)
+        if url:
+            self_p["background-image"] = f"url({url})"
+        for key, css in (("background_position", "background-position"),
+                         ("background_repeat", "background-repeat"),
+                         ("background_size", "background-size"),
+                         ("background_attachment", "background-attachment")):
+            if s.get(key):
+                self_p[css] = s[key]
+    # Border.
+    bs = s.get("border_border") or s.get("_border_border")
+    if bs:
+        self_p["border-style"] = bs
+    for key in ("border_width", "_border_width"):
+        self_p.update(box_longhands("border-width", s.get(key)))
+    bc = color_of(s, "border_color") or color_of(s, "_border_color")
+    if bc:
+        self_p["border-color"] = bc
+    rv = radius_value(s.get("border_radius") or s.get("_border_radius"))
+    if rv:
+        self_p["border-radius"] = rv
+    # Typography (wrapper inherits into inner text; heading titles get it too).
+    tp = typo_props(s)
+    if tp:
+        self_p.update(tp)
+        head_p.update(tp)
+    tc = color_of(s, "title_color")
+    if tc:
+        self_p["color"] = tc
+        head_p["color"] = tc
+    al = s.get("align") or s.get("alignment")
+    if al in ("left", "center", "right", "justify"):
+        self_p["text-align"] = al
+    # Position / stacking / overflow / height.
+    pos = s.get("_position")
+    if pos in ("absolute", "relative", "fixed", "sticky", "static"):
+        self_p["position"] = pos
+        oh = s.get("_offset_orientation_h") or "start"
+        ov = s.get("_offset_orientation_v") or "start"
+        ox = s.get("_offset_x_end") if oh == "end" else s.get("_offset_x")
+        oy = s.get("_offset_y_end") if ov == "end" else s.get("_offset_y")
+        if ox is not None and ox != "":
+            self_p["right" if oh == "end" else "left"] = size_value(ox, "left")
+        if oy is not None and oy != "":
+            self_p["bottom" if ov == "end" else "top"] = size_value(oy, "top")
+    zi = s.get("z_index") if s.get("z_index") is not None else s.get("_z_index")
+    if zi not in (None, ""):
+        self_p["z-index"] = str(zi)
+    ovf = s.get("overflow")
+    if ovf in ("hidden", "visible", "auto", "scroll", "clip"):
+        self_p["overflow"] = ovf
+    mh = size_value(s.get("min_height"), "min-height")
+    if mh:
+        self_p["min-height"] = mh
+    elif s.get("height") is not None:
+        hv = size_value(s.get("height"), "min-height")
+        if hv:
+            self_p["min-height"] = hv
+    # Boxed content width -> inner max-width (content_width wins over boxed).
+    # A string "full" means full width, not a length; "boxed" keeps the default.
+    cw = s.get("content_width") or s.get("boxed_width")
+    if isinstance(cw, str) and cw.strip() == "full":
+        inner_max = "100%"
+        self_p["--content-width"] = "100%"
+    elif cw is not None and not (isinstance(cw, str) and cw.strip() == "boxed"):
+        inner_max = size_value(cw, "max-width")
+        if inner_max:
+            self_p["--content-width"] = inner_max
+    return self_p, inner_p, head_p, inner_max
+
+
+def scope_custom_css(css, eid, failed):
+    """Scope one element's custom CSS under its element selector.
+
+    `selector` tokens become .elementor-element-<id>; every other selector
+    is prefixed with it. Remote URLs are dropped, demo upload URLs go local.
+    """
+    base_sel = f".elementor-element-{eid}"
+
+    def rewrite_urls(text):
+        text = re.sub(r"https://wp\.ravextheme\.com[^)'\"\s]+/wp-content/uploads/([^)'\"\s]+)",
+                       lambda m: uploads_local(m.group(0)) if uploads_local(m.group(0)) not in failed else "/assets/uploads/placeholder.svg", text)
+        text = re.sub(r"url\(\s*['\"]?https?://rrdevs\.net[^)'\"]*['\"]?\s*\)", "none", text)
+        return text
+
+    def scope_selector(sel):
+        sel = sel.strip()
+        if not sel:
+            return sel
+        if sel.startswith("selector"):
+            return base_sel + sel[len("selector"):]
+        if sel.startswith(base_sel):
+            return sel
+        if sel.startswith(":"):
+            return base_sel + sel
+        return f"{base_sel} {sel}"
+
+    def scope_block(text):
+        out = []
+        i, n = 0, len(text)
+        while i < n:
+            while i < n and text[i] in " \t\r\n;":
+                i += 1
+            if i >= n:
+                break
+            j = text.find("{", i)
+            if j == -1:
+                break
+            head = text[i:j].strip()
+            depth, k = 1, j + 1
+            while k < n and depth:
+                if text[k] == "{":
+                    depth += 1
+                elif text[k] == "}":
+                    depth -= 1
+                k += 1
+            body = text[j + 1:k - 1]
+            if head.startswith("@media"):
+                out.append(f"{head} {{\n{scope_block(body)}\n}}")
+            elif head.startswith("@"):
+                out.append(f"{head} {{{body}}}")
+            else:
+                sels = ", ".join(scope_selector(s) for s in head.split(","))
+                out.append(f"{sels} {{{rewrite_urls(body)}}}")
+            i = k
+        return "\n".join(out)
+
+    css = rewrite_urls(css)
+    return scope_block(css)
+
+
+LAYOUT_KEY_FAMILIES = ("width", "_element_width", "_flex_size", "_flex_order",
+                       "_flex_align_self", "flex_direction", "flex_wrap",
+                       "flex_align_items", "flex_justify_content", "flex_gap",
+                       "gap", "padding", "_padding", "margin", "_margin",
+                       "background_", "border_", "typography_", "title_color",
+                       "align", "alignment", "_position", "_offset_", "z_index",
+                       "_z_index", "overflow", "min_height", "height",
+                       "content_width", "boxed_width", "wcf_custom_css")
+
+
+def element_has_layout(settings):
+    for k in (settings or {}):
+        if any(k == fam or k.startswith(fam) for fam in LAYOUT_KEY_FAMILIES):
+            return True
+    return False
+
+
+def walk_elements(nodes, out):
+    for n in nodes:
+        if isinstance(n, dict):
+            out.append(n)
+            walk_elements(n.get("elements") or [], out)
+
+
+def collect_layout_elements():
+    recs = [PAGES[s] for s in KEEP_PAGES if s in PAGES]
+    used_h, used_f = set(), set()
+    for slug in KEEP_PAGES:
+        if slug in PAGES:
+            rec = PAGES[slug]
+            used_h.add(rec["meta"].get("redox_header_templates") or DEFAULT_HEADER_ID)
+            used_f.add(rec["meta"].get("redox_footer_templates") or DEFAULT_FOOTER_ID)
+    for hid in used_h:
+        if hid in HEADERS:
+            recs.append(HEADERS[hid])
+    for fid in used_f:
+        if fid in FOOTERS:
+            recs.append(FOOTERS[fid])
+    if DATA["offcanvas"] is not None:
+        recs.append(DATA["offcanvas"])
+    seen, els = set(), []
+    for rec in recs:
+        try:
+            data = json.loads(rec["meta"].get("_elementor_data", "[]"))
+        except Exception:
+            continue
+        batch = []
+        walk_elements(data, batch)
+        for el in batch:
+            eid = el.get("id")
+            if eid and eid not in seen:
+                seen.add(eid)
+                els.append(el)
+    return els
+
+
+def element_layout_rules(el, failed):
+    """All breakpoint rules for one element: {bp: {selector: {prop: val}}}."""
+    settings = el.get("settings") or {}
+    base, per = split_breakpoints(settings)
+    out = {}
+    for bp, s in [("base", base)] + [(b, per[b]) for b in BP_ORDER]:
+        self_p, inner_p, head_p, inner_max = extract_props(s, el.get("elType"), failed)
+        if not (self_p or inner_p or head_p or inner_max):
+            continue
+        eid = el.get("id")
+        base_sel = f".elementor-element-{eid}"
+        sels = {}
+        if self_p:
+            sels[f"{base_sel}, .e-con-inner > {base_sel}"] = self_p
+        if inner_p:
+            sels[f"{base_sel} > .e-con-inner"] = inner_p
+        if head_p:
+            sels[f"{base_sel} .elementor-heading-title"] = head_p
+        if inner_max:
+            sels[f"{base_sel}.e-con-boxed > .e-con-inner"] = {"max-width": inner_max}
+        if sels:
+            out[bp] = sels
+    return out
+
+
+def generate_layout_css(failed):
+    els = collect_layout_elements()
+    by_bp = {"base": {}, "widescreen": {}, "laptop": {}, "tablet_extra": {},
+             "tablet": {}, "mobile_extra": {}, "mobile": {}}
+    custom_blocks = []
+    covered, with_layout = 0, 0
+    per_page_coverage = {}
+    for el in els:
+        rules = element_layout_rules(el, failed)
+        has_layout = element_has_layout(el.get("settings") or {})
+        if has_layout:
+            with_layout += 1
+        if rules:
+            covered += 1
+        for bp, sels in rules.items():
+            for sel, props in sels.items():
+                by_bp[bp].setdefault(sel, {}).update(props)
+    # Custom CSS is scoped per element, so it needs its source element id.
+    for el in els:
+        css = (el.get("settings") or {}).get("wcf_custom_css") or ""
+        if css.strip():
+            if re.search(r"wordpress", css, re.IGNORECASE):
+                warn(f"custom CSS dropped for element {el.get('id')} (builder reference)")
+                continue
+            custom_blocks.append(scope_custom_css(css, el.get("id"), failed))
+    # Per-page coverage for the two pages the fix is judged on.
+    for slug in ("digital-agency", "digital-agency-classic"):
+        if slug not in PAGES:
+            continue
+        try:
+            batch = []
+            walk_elements(json.loads(PAGES[slug]["meta"].get("_elementor_data", "[]")), batch)
+        except Exception:
+            batch = []
+        tot = sum(1 for e in batch if element_has_layout(e.get("settings") or {}))
+        cov = sum(1 for e in batch if element_layout_rules(e, failed))
+        per_page_coverage[slug] = {"with_layout": tot, "with_rules": cov}
+    lines = ["/* Per-element layout rules generated from demo page settings. */"]
+    lines.append("@media (min-width: 2400px) { .elementor-hidden-widescreen { display: none !important; } }")
+    lines.append("@media (min-width: 1367px) and (max-width: 2399px) { .elementor-hidden-desktop { display: none !important; } }")
+    lines.append("@media (min-width: 1201px) and (max-width: 1366px) { .elementor-hidden-laptop { display: none !important; } }")
+    lines.append("@media (min-width: 1025px) and (max-width: 1200px) { .elementor-hidden-tablet_extra { display: none !important; } }")
+    lines.append("@media (min-width: 881px) and (max-width: 1024px) { .elementor-hidden-tablet { display: none !important; } }")
+    lines.append("@media (min-width: 768px) and (max-width: 880px) { .elementor-hidden-mobile_extra { display: none !important; } }")
+    lines.append("@media (max-width: 767px) { .elementor-hidden-mobile { display: none !important; } }")
+    rule_count = 0
+    for sel, props in sorted(by_bp["base"].items()):
+        body = "; ".join(f"{k}: {v}" for k, v in props.items())
+        lines.append(f"{sel} {{ {body}; }}")
+        rule_count += 1
+    for bp in BP_ORDER:
+        if not by_bp[bp]:
+            continue
+        lines.append(f"{BP_MEDIA[bp]} {{")
+        for sel, props in sorted(by_bp[bp].items()):
+            body = "; ".join(f"{k}: {v}" for k, v in props.items())
+            lines.append(f"  {sel} {{ {body}; }}")
+            rule_count += 1
+        lines.append("}")
+    lines.extend(custom_blocks)
+    css = "\n".join(lines) + "\n"
+    return css, {"rules": rule_count, "elements": len(els),
+                 "with_layout": with_layout, "covered": covered,
+                 "custom_blocks": len(custom_blocks),
+                 "per_page": per_page_coverage}
+
+
 # ---------------------------------------------------------------- assembly
 def render_template_cache(rec):
     return render_placeholders(cache_content(rec))
 
 
 def main():
+    # The container build (Dockerfile runs `npm run build`, which triggers
+    # this script via `prebuild`) has no demo source files, so skip cleanly
+    # there and keep the committed generated files instead of failing.
+    if not XML.exists():
+        print("Demo source not present, keeping existing generated files.")
+        return
     print("Parsing demo content...")
     kept = []
     for slug in KEEP_PAGES:
@@ -1093,6 +1699,12 @@ def main():
     print(f"demo image URLs referenced: {len(urls)}")
     failed = download_images(urls)
     print(f"downloaded ok: {len(urls) - len(failed)}, failed: {len(failed)}")
+
+    # Per-element layout CSS from demo settings (generated, not hand-edited).
+    layout_css, layout_stats = generate_layout_css(failed)
+    (ROOT / "public" / "assets" / "css" / "generated-layout.css").write_text(layout_css)
+    print(f"generated layout CSS: {len(layout_css)} bytes, {layout_stats['rules']} rules, "
+          f"{layout_stats['covered']}/{layout_stats['with_layout']} layout elements covered")
 
     # Clean fragments.
     data_dir = ROOT / "src" / "data" / "wp"
@@ -1208,6 +1820,8 @@ def main():
         "CSS comments were stripped from copied theme stylesheets.",
         "The theme ad/ folder is not shipped; no kept page references it.",
         "Post pages render title, date, categories, featured image and body only; the theme related-posts block is not reproduced.",
+        "Generated layout CSS converts per-element width, flex, gap, padding, margin, background, border, typography, position and height settings from demo data, including scoped custom CSS. Not converted: grid_gaps, background overlays, transforms/animations, and widget-internal spacings (icon_gap, image_space, title_gap); container height settings become min-height; nested widget typography groups apply to the wrapper; responsive visibility classes use reconstructed device ranges.",
+        "Per-element layout CSS is generated by scripts/build.py into public/assets/css/generated-layout.css and linked after the theme stylesheets.",
     ])
     manifest = {
         "pages": {slug: {"url": f"/{slug}/", "title": info["title"]} for slug, info in page_info.items()},
@@ -1217,6 +1831,9 @@ def main():
         "images_failed": REPORT["failed_images"],
         "unknown_page_links": dict(REPORT["unknown_page_links"]),
         "widget_counts": dict(REPORT["widget_counts"]),
+        "generated_layout_css_bytes": len(layout_css),
+        "generated_layout_css_rules": layout_stats["rules"],
+        "layout_coverage": layout_stats,
         "warnings": REPORT["warnings"],
         "approximations": REPORT["approximations"],
     }

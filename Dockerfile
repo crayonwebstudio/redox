@@ -1,5 +1,8 @@
 # Build stage
 FROM node:22-alpine AS build
+# package.json prebuild runs scripts/build.py (stdlib only); the guard inside
+# skips cleanly when demo sources are absent, but python3 itself must exist.
+RUN apk add --no-cache python3
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
