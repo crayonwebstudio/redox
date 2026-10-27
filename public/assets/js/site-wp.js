@@ -23,6 +23,56 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Counters: the original widget animates from its starting value to
+  // the target when scrolled into view, and that animation script is not
+  // shipped. The markup already carries the final value (rendered by the
+  // generator), so the correct number shows even without JavaScript; with
+  // it, the count-up runs once on first view, using the widget's own
+  // duration, starting value, target, and delimiter attributes.
+  const formatCounter = (value, delimiter, decimals) => {
+    const fixed = decimals > 0 ? value.toFixed(decimals) : String(Math.round(value));
+    const parts = fixed.split('.');
+    let intPart = parts[0];
+    if (delimiter) {
+      let grouped = '';
+      while (intPart.length > 3) {
+        grouped = delimiter + intPart.slice(-3) + grouped;
+        intPart = intPart.slice(0, -3);
+      }
+      intPart = intPart + grouped;
+    }
+    return decimals > 0 ? intPart + '.' + (parts[1] || '') : intPart;
+  };
+  document.querySelectorAll('.elementor-counter-number').forEach((el) => {
+    const to = parseFloat(el.getAttribute('data-to-value'));
+    if (Number.isNaN(to)) return;
+    const from = parseFloat(el.getAttribute('data-from-value') || '0') || 0;
+    const duration = parseInt(el.getAttribute('data-duration') || '2000', 10) || 2000;
+    const delimiter = el.getAttribute('data-delimiter') || '';
+    const rawTo = el.getAttribute('data-to-value') || '';
+    const decimals = rawTo.indexOf('.') >= 0 ? rawTo.split('.')[1].length : 0;
+    const finalText = formatCounter(to, delimiter, decimals);
+    if (!('IntersectionObserver' in window)) return; // markup already final
+    el.textContent = formatCounter(from, delimiter, decimals);
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        if (duration <= 0) { el.textContent = finalText; return; }
+        const start = performance.now();
+        const step = (now) => {
+          const t = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          el.textContent = formatCounter(from + (to - from) * eased, delimiter, decimals);
+          if (t < 1) requestAnimationFrame(step);
+          else el.textContent = finalText;
+        };
+        requestAnimationFrame(step);
+      });
+    }, { threshold: 0.25 });
+    observer.observe(el);
+  });
+
   // Off-canvas panel.
   const panel = document.querySelector('.offcanvas-area');
   const overlay = document.createElement('div');

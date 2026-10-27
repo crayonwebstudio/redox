@@ -831,6 +831,56 @@ SOCIAL_DOMAINS = ("facebook.com", "instagram.com", "x.com", "twitter.com",
                   "dribble.com", "pinterest.com")
 
 
+def format_counter_value(raw, delimiter):
+    """Format a counter target value the way the original widget displays
+    it: thousands grouped with the delimiter character, decimals kept as
+    written (e.g. "278" -> "278", "1.7" -> "1.7", "1200" with "," -> "1,200").
+    Returns None when raw is not a number."""
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return None
+    text = str(raw).strip()
+    decimals = len(text.split(".")[1]) if "." in text else 0
+    if decimals:
+        int_part, _, frac_part = f"{value:.{decimals}f}".partition(".")
+    else:
+        int_part, frac_part = str(int(round(value))), ""
+    if delimiter:
+        grouped = ""
+        while len(int_part) > 3:
+            grouped = delimiter + int_part[-3:] + grouped
+            int_part = int_part[:-3]
+        int_part = int_part + grouped
+    return int_part + ("." + frac_part if decimals else "")
+
+
+def counter_final_values(html):
+    """Render each counter widget's FINAL value in its number span.
+
+    The pre-rendered cache ships counters as "0" with data-to-value /
+    data-duration / data-delimiter attributes, and the original count-up
+    JavaScript is not shipped, so without this the number stays at 0
+    forever. Putting the final value in the markup is progressive
+    enhancement: the correct number shows even without JavaScript, and
+    site-wp.js animates from the starting value to it on first view.
+    Prefix/suffix spans and all data attributes are left untouched."""
+    def repl(m):
+        tag, inner = m.group(1), m.group(2)
+        to_match = re.search(r'data-to-value="([^"]+)"', tag)
+        del_match = re.search(r'data-delimiter="([^"]*)"', tag)
+        if not to_match:
+            return m.group(0)
+        final = format_counter_value(
+            to_match.group(1), del_match.group(1) if del_match else "")
+        if final is None:
+            return m.group(0)
+        return f"<span {tag}>{final}</span>"
+    return re.sub(
+        r'<span ([^>]*class="[^"]*elementor-counter-number[^"]*"[^>]*)>([^<]*)</span>',
+        repl, html)
+
+
 def post_clean(html):
     """Anchor-level fixes the tag parser cannot do alone: bare social links
     (no real profile) become plain text, map/city links are dropped, and
@@ -854,6 +904,10 @@ def post_clean(html):
     for marker in ("Ranchview", "Dorland", "Green Road", "1772 Street", "772 Street"):
         html = _drop_blocks_with(html, marker)
     html = html.replace("3891 Ranchview Dr. Richardson", "")
+    # Counters ship as "0" with data-to-value; render the final value so
+    # the number is correct even without JavaScript (site-wp.js animates
+    # from the starting value to it on first view).
+    html = counter_final_values(html)
     return html
 
 
